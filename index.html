@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>🕵️‍♂️ Impostor Game</title>
+<title>🕵️‍♂️ IMPOSTOR GAME</title>
 <style>
 body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #fff; text-align: center; margin: 0; padding: 0; }
-h1 { color: #00d26a; margin-top: 30px; font-size: 28px; }
+h1 { color: #00d26a; margin-top: 40px; font-size: 35px; }
 button { background: #00d26a; color: black; border: none; border-radius: 12px; padding: 20px 40px; font-size: 20px; margin: 15px 0; cursor: pointer; width: 80%; max-width: 300px; }
 button:hover { background: #00b85d; }
 input { font-size: 20px; padding: 15px; border-radius: 10px; border: 1px solid #ccc; width: 80%; max-width: 300px; text-align: center; margin-bottom: 15px; }
@@ -15,7 +15,7 @@ input { font-size: 20px; padding: 15px; border-radius: 10px; border: 1px solid #
 </style>
 </head>
 <body>
-<h1>🕵️‍♂️ Impostor Game</h1>
+<h1>🕵️‍♂️ IMPOSTOR GAME</h1>
 
 <div id="menu">
   <input id="playerName" placeholder="Twoje imię" />
@@ -57,7 +57,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const words = ["TikTok","mem","Netflix","lody","rower","żaba","cebula","pączek","pizza","drama","uwu","sigma","snap","Discord","YouTube","szkoła","tramwaj","wakacje","park","kot","pies","telefon","komputer","fryzura","emoji","Chad","Sigma face","ban","flex","kanapka","długopis","kaktus","drip","domówka","herbata","miłość","gra","keyboard","film","sport","pralka","sushi","team","keyboard","muzyka","Spotify","pociąg"];
+const words = ["OKO","DARMOZJAD","TIKTOK","MEM","NETFLIX%CHILL","LODY","ROWER","ŻABKA","CARPATH","AGRECOL","PIZZA","PASTA","STARUCH","SIGMA","SNAP","DISCORD","PORNHUB","SZKOŁA","TRAMWAJ","WAKACJE","PARK","KOT","PIES","IPHONE","KOMPUTER","FRYZURA","EMOJI","POLICJA","SIGMA FACE","BAN","FLEX","KANAPKA","DŁUGOPIS","KAKTUS","DRIP","DOMÓWKA","HERBATA","MIŁOŚĆ","GRA","SZKLANKA","FILM","SPORT","PRALKA","SUSHI","TEAM","FACEBOOK","POPUŚ","YOUTUBE","POCIĄG","JARMARK","DOM","BUDYNEK","BRAMKA","IPHONE"];
 
 let playerId = Math.random().toString(36).substring(2,9);
 let roomRef = null;
@@ -188,3 +188,4 @@ document.getElementById("btnNextRound").addEventListener("click", nextRound);
 </script>
 </body>
 </html>
+
