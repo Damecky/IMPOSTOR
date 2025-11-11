@@ -167,7 +167,7 @@ async function updatePlayerList() {
   const playersList = data.players ? Object.values(data.players).map(p => p.name) : [];
   document.getElementById("playerList").innerText = playersList.join(", ");
   const nonHostCount = playersList.filter(n => !n.includes("(HOST)")).length;
-  document.getElementById("players").innerText = `Gracze: ${nonHostCount}/4`;
+  document.getElementById("players").innerText = `Gracze: ${nonHostCount}/6`;
 }
 
 // Tworzenie pokoju
@@ -271,6 +271,7 @@ document.getElementById("btnNextRound").addEventListener("click", nextRound);
 </script>
 </body>
 </html>
+
 
 
 
