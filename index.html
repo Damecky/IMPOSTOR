@@ -236,7 +236,7 @@ window.startGame = async function() {
   const snap = await roomRef.get();
   const data = snap.val();
   const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
-  if (players.length !== 4) return alert("Musi być dokładnie 6 graczy (bez hosta)!");
+  if (players.length !== 4) return alert("Musi być dokładnie 4 graczy (bez hosta)!");
 
   const word = words[Math.floor(Math.random() * words.length)];
   const impostor = players[Math.floor(Math.random() * players.length)];
@@ -271,6 +271,7 @@ document.getElementById("btnNextRound").addEventListener("click", nextRound);
 </script>
 </body>
 </html>
+
 
 
 
