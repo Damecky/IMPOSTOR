@@ -75,14 +75,16 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const words = ["ASTRONAUTA","PARAPET","KANIBAL","BETONIARKA","HIPOPOTAM","ŻAGLÓWKA","ANTARKTYDA","MAGNES","LAWENDA","ŻYRANDOL","ŻÓŁW","PIORUN","ROWERZYSTA","KOSMITA","SUSHI","MIŁOŚĆ","FILM","SPORT","POLICJA","DOM","PIES","KOT","TRAMWAJ","LUNETA","FOTOGRAF","PIANINO"];
+const words = ["ASTRONAUTA","PARAPET","KANIBAL","BETONIARKA","HIPOPOTAM","ŻAGLÓWKA","MAGNES","LAWENDA","ŻYRANDOL","ŻÓŁW","PIORUN","ROWERZYSTA","KOSMITA","SUSHI","MIŁOŚĆ","FILM","SPORT","POLICJA","DOM","PIES","KOT","TRAMWAJ","FOTOGRAF","PIANINO"];
 let playerId = Math.random().toString(36).substring(2,9);
 let roomRef = null;
 let playerName = "";
 let isHost = false;
 let hasVoted = false;
+let selectedVote = null;
 
 function randomCode(){return Math.floor(1000+Math.random()*9000).toString();}
+function showMyName(){const div=document.getElementById("myName");div.innerText="Twoje imię: "+playerName;div.classList.remove("hidden");}
 function showResult(text){const r=document.getElementById("result");r.innerText=text;r.classList.remove("hidden");}
 function hideResult(){document.getElementById("result").classList.add("hidden");}
 
@@ -106,6 +108,7 @@ window.createRoom=async function(){
   document.getElementById("menu").classList.add("hidden");
   document.getElementById("hostPanel").classList.remove("hidden");
   document.getElementById("roomCode").innerText=code;
+  showMyName();
   roomRef.on("value",snap=>{updatePlayerList();});
 }
 
@@ -119,6 +122,7 @@ window.joinRoom=async function(){
   await db.ref(`rooms/${code}/players/${playerId}`).set({name:playerName});
   document.getElementById("menu").classList.add("hidden");
   document.getElementById("waiting").classList.remove("hidden");
+  showMyName();
   roomRef.on("value",snap=>{
     const data=snap.val();updatePlayerList();
     if(data.started&&data.roles&&data.word)handleGameData(data);
@@ -128,7 +132,7 @@ window.joinRoom=async function(){
 
 // Start gry (host)
 window.startGame=async function(){
-  hideResult();
+  hideResult();hasVoted=false;selectedVote=null;
   const s=await roomRef.get();const data=s.val();
   const players=Object.keys(data.players).filter(id=>!data.players[id].name.includes("(HOST)"));
   if(players.length<3)return alert("Potrzebujesz co najmniej 3 graczy!");
@@ -136,11 +140,11 @@ window.startGame=async function(){
   const impostor=players[Math.floor(Math.random()*players.length)];
   const roles={};players.forEach(p=>roles[p]=(p===impostor)?"impostor":"normal");
   roles[playerId]="host";
-  await roomRef.update({started:true,roles,word,votes:{},roundEnded:false});
+  await roomRef.update({started:true,roles,word,votes:{},roundEnded:false,impostorWin:false});
   showResult("Runda rozpoczęta!");
 }
 
-// Obsługa danych gry
+// Logika gry
 function handleGameData(data){
   const role=data.roles[playerId];
   hideResult();
@@ -153,7 +157,9 @@ function handleGameData(data){
     return;
   }
   showResult("🔤 Hasło: "+data.word);
-  const allPlayers=Object.entries(data.players).filter(([id,p])=>!p.name.includes("(HOST)")&&p.name!==playerName).map(([id,p])=>p.name);
+  const allPlayers=Object.entries(data.players)
+    .filter(([id,p])=>!p.name.includes("(HOST)") && data.roles[id]!=="impostor" && p.name!==playerName)
+    .map(([id,p])=>p.name);
   setTimeout(()=>showVotePanel(allPlayers),2000);
 }
 
@@ -170,18 +176,17 @@ function showVotePanel(players){
   document.getElementById("votePanel").classList.remove("hidden");
 }
 
-let selectedVote=null;
 function selectVote(name){
   selectedVote=name;
   document.getElementById("selectedName").innerText="Twój wybór: "+name;
   document.getElementById("voteConfirm").classList.remove("hidden");
 }
 
-// Potwierdzenie / cofnięcie głosu
 document.getElementById("btnCancelVote").onclick=function(){
   selectedVote=null;
   document.getElementById("voteConfirm").classList.add("hidden");
 };
+
 document.getElementById("btnConfirmVote").onclick=async function(){
   if(!selectedVote||hasVoted)return;
   hasVoted=true;
@@ -191,21 +196,19 @@ document.getElementById("btnConfirmVote").onclick=async function(){
   checkAllVoted();
 };
 
-// Sprawdzenie czy wszyscy oddali głosy
 async function checkAllVoted(){
   const s=await roomRef.get();const d=s.val();
-  const totalPlayers=Object.keys(d.roles).filter(id=>d.roles[id]!=="host"&&d.roles[id]!=="impostor").length+1; // impostor też liczy się do głosów
+  const eligible=Object.keys(d.roles).filter(id=>d.roles[id]!=="host"&&d.roles[id]!=="impostor");
   const votesCount=Object.keys(d.votes||{}).length;
-  if(votesCount>=totalPlayers){await roomRef.update({roundEnded:true});}
+  if(votesCount>=eligible.length){await roomRef.update({roundEnded:true});}
 }
 
-// Zgadywanie hasła przez impostora
 document.getElementById("submitWord").onclick=async function(){
   const val=document.getElementById("impostorWord").value.trim();
   const s=await roomRef.get();const d=s.val();
   if(val.toLowerCase()===d.word.toLowerCase()){
     await roomRef.update({roundEnded:true,impostorWin:true});
-  }else alert("Błędne hasło!");
+  } else alert("Błędne hasło!");
 };
 
 // Zakończenie rundy
@@ -214,6 +217,7 @@ function endRound(data){
   const impostorName=data.players[impostorId].name;
   const votes=data.votes||{};
   const role=data.roles[playerId];
+
   document.getElementById("impostorGuessPanel").classList.add("hidden");
   document.getElementById("votePanel").classList.add("hidden");
 
@@ -221,10 +225,6 @@ function endRound(data){
     showResult("🕵️‍♂️ IMPOSTOR ODGADŁ HASŁO!");
     return;
   }
-
-  const totalPlayers=Object.keys(data.roles).filter(id=>data.roles[id]!=="host").length;
-  const votesCount=Object.keys(votes).length;
-  if(votesCount<totalPlayers)return;
 
   if(role!=="host"){
     const myVote=votes[playerId];
