@@ -31,7 +31,7 @@ input { font-size: 18px; padding: 12px; border-radius: 10px; border: 1px solid #
 <!-- PANEL HOSTA -->
 <div id="hostPanel" class="hidden">
   <h2>Kod pokoju: <span id="roomCode"></span></h2>
-  <p id="players">Gracze: 0/4</p>
+  <p id="players">Gracze: 0/6</p>
   <p id="playerList"></p>
   <button id="btnStart">Rozdaj role</button>
 </div>
@@ -142,7 +142,7 @@ async function joinRoom(){
 function updatePlayerList(data){
   const list=Object.values(data.players||{}).map(p=>p.name);
   document.getElementById("playerList").innerText=list.join(", ");
-  document.getElementById("players").innerText=`Gracze: ${list.filter(n=>!n.includes("(HOST)")).length}/4`;
+  document.getElementById("players").innerText=`Gracze: ${list.filter(n=>!n.includes("(HOST)")).length}/6`;
 }
 
 // 🔹 Obsługa danych gry po starcie
@@ -220,4 +220,5 @@ document.getElementById("btnStart").onclick=startGame;
 </script>
 </body>
 </html>
+
 
