@@ -13,15 +13,11 @@ body {
   margin: 0; 
   padding: 0; 
 }
-
-/* Większy tytuł i emoji */
 h1 { 
   color: #00d26a; 
   margin-top: 40px; 
   font-size: 42px; 
 }
-
-/* Przyciski */
 button { 
   background: #00d26a; 
   color: black; 
@@ -34,11 +30,7 @@ button {
   width: 80%; 
   max-width: 300px; 
 }
-button:hover { 
-  background: #00b85d; 
-}
-
-/* Pola tekstowe */
+button:hover { background: #00b85d; }
 input { 
   font-size: 20px; 
   padding: 15px; 
@@ -49,8 +41,6 @@ input {
   text-align: center; 
   margin-bottom: 15px; 
 }
-
-/* Panel gracza z lekkim efektem świecenia */
 #myName {
   margin-top: 20px;
   padding: 20px;
@@ -60,8 +50,6 @@ input {
   font-size: 20px;
   display: inline-block;
 }
-
-/* Karta z hasłem — wyróżniona */
 .card { 
   margin-top: 30px; 
   padding: 25px 30px; 
@@ -76,8 +64,60 @@ input {
   word-wrap: break-word; 
   transition: all 0.3s ease;
 }
-
 .hidden { display: none; }
+
+/* --- Panel głosowania --- */
+#votePanel {
+  margin-top: 30px;
+  padding: 20px;
+  background: #1c222b;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0,210,106,0.3);
+  display: inline-block;
+}
+.voteBtn {
+  display: block;
+  background: #00d26a;
+  color: black;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 10px auto;
+  width: 80%;
+  max-width: 250px;
+  font-size: 18px;
+  cursor: pointer;
+}
+.voteBtn:hover { background: #00b85d; }
+
+/* --- Panel impostora --- */
+#impostorGuessPanel {
+  margin-top: 30px;
+  padding: 20px;
+  background: #1c222b;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+  display: inline-block;
+}
+#impostorGuess {
+  font-size: 18px;
+  padding: 10px;
+  width: 80%;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  text-align: center;
+  margin-bottom: 10px;
+}
+#btnGuessWord {
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 18px;
+}
+#btnGuessWord:hover { background: #e63c3c; }
 </style>
 </head>
 <body>
@@ -106,6 +146,24 @@ input {
 <div id="myName" class="hidden card"></div>
 <div id="result" class="hidden card"></div>
 
+<!-- Panel głosowania -->
+<div id="votePanel" class="hidden">
+  <h2>Wybierz, kto jest impostorem:</h2>
+  <div id="voteList"></div>
+  <div id="voteConfirm" class="hidden">
+    <p id="voteTargetText"></p>
+    <button id="btnConfirmVote">✅ POTWIERDŹ WYBÓR</button>
+    <button id="btnCancelVote">↩️ COFNIJ</button>
+  </div>
+</div>
+
+<!-- Panel dla impostora -->
+<div id="impostorGuessPanel" class="hidden">
+  <h2>Spróbuj odgadnąć hasło!</h2>
+  <input id="impostorGuess" placeholder="Wpisz hasło..." />
+  <button id="btnGuessWord">ZATWIERDŹ HASŁO</button>
+</div>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -124,150 +182,203 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const words = ["ASTRONAUTA","PARAPET","KANIBAL","BETONIARKA","KAPSEL","HIPOPOTAM","TEŚCIOWA",
-"ŻAGLÓWKA","ANTARKTYDA","MAGNEZ","WIEWIÓRKA","KARALUCH","PUDEŁKO","APOKALIPSA",
-"CHMURKA","KREDENS","WIRUS","LAWENDA","KSEROKOPIARKA","ŻYRANDOL","KASZANKA",
-"PARASOLKA","GILOTYNA","PANCERNIK","ŚRUBOKRĘT","SATELITA","KOCIOŁEK","DONICZKA",
-"PIEKARNIK","SZACHISTA","GRZYBNIA","ANANAS","TRĄBKA","SPAGHETTI","MARCHEWKA",
-"ŻÓŁW","ROLNIK","MIKROFON","BUMERANG","FOTOGRAF","ROBOT","TRAKTORZYSTA","BANAN",
-"LUNETA","DŻUNGLA","PIANINO","PŁYTA","KURCZAK","GWOŹDZIE","CZAJNIK","BAJGIEL",
-"TELESKOP","DRUKARKA","MRÓZ","SZYBA","KAMIEŃ","FORTEPIAN","LUSTERKO","SIEKIERA",
-"LATARKA","KOŃCÓWKA","MIŚ","CZARODZIEJ","KALENDARZ","SOFA","MUSZTARDA","TRZMIEL",
-"PĄCZEK","DINOZAUR","PLECAK","PERFUMY","KOSMITA","PIŻAMA","OGÓREK","ROWERZYSTA",
-"KSIĘŻYC","PIORUN","FRYTKI","TELEWIZOR","SAMOLOT","SŁUCHAWKI","PIANISTA","ŻETON",
-"CZEKOLADA","ŻOŁNIERZ","NURKOWANIE","MAGNES","KLEJ","PAJĄK","WAZON","TELEPORT",
-"GUMA","PLAKAT","TORNADO","TŁUMACZ","SANKI","LAMPA","BĄBELEK","MAKARON","RAKIETA","OKO","DARMOZJAD","TIKTOK","MEM","NETFLIX","KRAJOBRAZ","ROWER","TULEJA","CARPATH","AGRECOL","HITLER","REWOLWER","STARUCH","SIGMA","SNAP","DISCORD","MINISTERSTWO","TRAMWAJ","WAKACJE","PARK","KOT","PIES","IPHONE","KOMPUTER","FRYZURA","EMOJI","POLICJA","BAN","FLEX","KANAPKA","DŁUGOPIS","KAKTUS","DRIP","DOMÓWKA","HERBATA","MIŁOŚĆ","GRA","FILM","SPORT","PRALKA","SUSHI","TEAM","FACEBOOK","YOUTUBE","POCIĄG","DOM","BUDYNEK","BRAMKA"];
+const MAX_PLAYERS = 6;
 
 let playerId = Math.random().toString(36).substring(2,9);
 let roomRef = null;
 let isHost = false;
 let playerName = "";
+let selectedVote = null;
+let hasVoted = false;
+let totalPlayers = 0;
 
 function randomCode() { return Math.floor(1000 + Math.random() * 9000).toString(); }
-
 function showMyName() {
   const nameDiv = document.getElementById("myName");
   nameDiv.innerText = `Twoje imię: ${playerName}`;
   nameDiv.classList.remove("hidden");
 }
-
 function showResult(text) {
   document.getElementById("result").innerText = text;
   document.getElementById("result").classList.remove("hidden");
-
-  const waitingDiv = document.getElementById("waiting");
-  if (!waitingDiv.classList.contains("hidden")) {
-    waitingDiv.querySelector("h2").innerText = "ZGADNIJ IMPOSTORA";
-  }
 }
-
 async function updatePlayerList() {
   const snap = await roomRef.get();
   const data = snap.val();
   const playersList = data.players ? Object.values(data.players).map(p => p.name) : [];
   document.getElementById("playerList").innerText = playersList.join(", ");
   const nonHostCount = playersList.filter(n => !n.includes("(HOST)")).length;
-  document.getElementById("players").innerText = `Gracze: ${nonHostCount}/6`;
+  document.getElementById("players").innerText = `Gracze: ${nonHostCount}/${MAX_PLAYERS}`;
 }
 
-// Tworzenie pokoju
+/* --- Tworzenie pokoju --- */
 window.createRoom = async function() {
   playerName = document.getElementById("playerName").value.trim();
   if (!playerName) return alert("Podaj imię!");
   playerName += " (HOST)";
   isHost = true;
   showMyName();
-
   const code = randomCode();
   roomRef = db.ref("rooms/" + code);
-  await roomRef.set({ players: {}, started: false });
-
+  await roomRef.set({ players: {}, started: false, scores: {} });
   document.getElementById("menu").classList.add("hidden");
   document.getElementById("hostPanel").classList.remove("hidden");
   document.getElementById("roomCode").innerText = code;
-
-  const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
-  await playerRef.set({ name: playerName });
-
-  roomRef.on("value", async snapshot => {
-    await updatePlayerList();
+  await db.ref(`rooms/${code}/players/${playerId}`).set({ name: playerName });
+  roomRef.on("value", snapshot => {
+    updatePlayerList();
     const data = snapshot.val();
-    if (data.started && data.roles && data.word) {
-      const role = data.roles[playerId];
-      if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
-      else if (role !== "host") showResult(`🔤 Hasło: ${data.word}`);
-    }
+    if (data.started && data.roles && data.word) handleGameData(data);
   });
 }
 
-// Dołączenie do pokoju
+/* --- Dołączanie --- */
 window.joinRoom = async function() {
   playerName = document.getElementById("playerName").value.trim();
   if (!playerName) return alert("Podaj imię!");
   showMyName();
-
   const code = document.getElementById("joinCode").value.trim();
   if (!code) return alert("Podaj kod pokoju!");
   roomRef = db.ref("rooms/" + code);
-
-  roomRef.get().then(async snapshot => {
-    if (!snapshot.exists()) return alert("Pokój nie istnieje!");
-
-    const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
-    playerRef.set({ name: playerName });
-
-    document.getElementById("menu").classList.add("hidden");
-    document.getElementById("waiting").classList.remove("hidden");
-
-    roomRef.on("value", snapshot => {
-      updatePlayerList();
-      const data = snapshot.val();
-      if (data.started && data.roles && data.word) {
-        const role = data.roles[playerId];
-        if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
-        else if (role !== "host") showResult(`🔤 Hasło: ${data.word}`);
-      }
-    });
+  const snapshot = await roomRef.get();
+  if (!snapshot.exists()) return alert("Pokój nie istnieje!");
+  await db.ref(`rooms/${code}/players/${playerId}`).set({ name: playerName });
+  document.getElementById("menu").classList.add("hidden");
+  document.getElementById("waiting").classList.remove("hidden");
+  roomRef.on("value", snapshot => {
+    updatePlayerList();
+    const data = snapshot.val();
+    if (data.started && data.roles && data.word) handleGameData(data);
   });
 }
 
-// Rozpoczęcie gry (host)
+/* --- Start gry --- */
 window.startGame = async function() {
   const snap = await roomRef.get();
   const data = snap.val();
   const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
-  if (players.length !== 6) return alert("Musi być dokładnie 6 graczy (bez hosta)!");
-
+  if (players.length !== MAX_PLAYERS) return alert(`Musi być dokładnie ${MAX_PLAYERS} graczy (bez hosta)!`);
+  const words = ["ASTRONAUTA","PARAPET","KANIBAL","BETONIARKA","KAPSEL","HIPOPOTAM","TEŚCIOWA","ŻAGLÓWKA","MAGNES","TELEFON","KOMPUTER","FRYZURA","PIES","KOT"];
   const word = words[Math.floor(Math.random() * words.length)];
   const impostor = players[Math.floor(Math.random() * players.length)];
   const roles = {};
   players.forEach(p => roles[p] = p === impostor ? "impostor" : "normal");
   roles[playerId] = "host";
-
-  await roomRef.update({ started: true, roles, word });
+  await roomRef.update({ started: true, roles, word, votes: {}, roundEnded: false });
   document.getElementById("btnNextRound").classList.remove("hidden");
   showResult("Runda rozpoczęta!");
 }
 
-// Rozlosowanie kolejnej rundy (host)
+/* --- Kolejna runda --- */
 window.nextRound = async function() {
   const snap = await roomRef.get();
   const data = snap.val();
   const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
-
+  const words = ["ASTRONAUTA","PARAPET","KANIBAL","BETONIARKA","KAPSEL","HIPOPOTAM","TEŚCIOWA","ŻAGLÓWKA","MAGNES","TELEFON","KOMPUTER","FRYZURA","PIES","KOT"];
   const word = words[Math.floor(Math.random() * words.length)];
   const impostor = players[Math.floor(Math.random() * players.length)];
   const roles = {};
   players.forEach(p => roles[p] = p === impostor ? "impostor" : "normal");
   roles[playerId] = "host";
-
-  await roomRef.update({ started: true, roles, word });
+  await roomRef.update({ started: true, roles, word, votes: {}, roundEnded: false });
   document.getElementById("result").classList.add("hidden");
 }
+
+/* --- Główna logika gry po rozpoczęciu --- */
+function handleGameData(data) {
+  const role = data.roles[playerId];
+  const word = data.word;
+  if (role === "impostor") {
+    showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
+    document.getElementById("impostorGuessPanel").classList.remove("hidden");
+  } else if (role !== "host") {
+    showResult(`🔤 Hasło: ${word}`);
+    const allPlayers = Object.values(data.players || {});
+    setTimeout(() => showVotePanel(allPlayers), 2000);
+  }
+  if (data.roundEnded) endRound(data);
+}
+
+/* --- Panel głosowania --- */
+function showVotePanel(players) {
+  const votePanel = document.getElementById("votePanel");
+  const voteList = document.getElementById("voteList");
+  const voteConfirm = document.getElementById("voteConfirm");
+  voteList.innerHTML = "";
+  votePanel.classList.remove("hidden");
+  voteConfirm.classList.add("hidden");
+  hasVoted = false;
+  players.forEach(p => {
+    if (p.name.includes("(HOST)") || p.name === playerName) return;
+    const btn = document.createElement("button");
+    btn.innerText = p.name;
+    btn.className = "voteBtn";
+    btn.onclick = () => selectVote(p.name);
+    voteList.appendChild(btn);
+  });
+}
+function selectVote(name) {
+  selectedVote = name;
+  document.getElementById("voteList").classList.add("hidden");
+  document.getElementById("voteConfirm").classList.remove("hidden");
+  document.getElementById("voteTargetText").innerText = `Czy potwierdzasz głos na: ${name}?`;
+}
+function cancelVote() {
+  selectedVote = null;
+  document.getElementById("voteConfirm").classList.add("hidden");
+  document.getElementById("voteList").classList.remove("hidden");
+}
+async function confirmVote() {
+  if (!selectedVote || hasVoted) return;
+  hasVoted = true;
+  const code = document.getElementById("roomCode").innerText || document.getElementById("joinCode").value;
+  await db.ref(`rooms/${code}/votes/${playerId}`).set(selectedVote);
+  document.getElementById("votePanel").innerHTML = `<h2>Dziękujemy!</h2><p>Oddałeś głos na: <b>${selectedVote}</b></p>`;
+  const snap = await roomRef.get();
+  const data = snap.val();
+  const votes = data.votes || {};
+  const players = Object.keys(data.players || {}).filter(p => !data.players[p].name.includes("(HOST)"));
+  if (Object.keys(votes).length === players.length) endRound(data);
+}
+document.getElementById("btnConfirmVote").addEventListener("click", confirmVote);
+document.getElementById("btnCancelVote").addEventListener("click", cancelVote);
+
+/* --- Zakończenie rundy i punktacja --- */
+async function endRound(data) {
+  if (data.roundEnded) return;
+  const votes = data.votes || {};
+  const roles = data.roles || {};
+  const impostorEntry = Object.entries(roles).find(([id, r]) => r === "impostor");
+  if (!impostorEntry) return;
+  const impostorId = impostorEntry[0];
+  const impostorName = data.players[impostorId].name;
+  const scores = data.scores || {};
+  for (const [pid, target] of Object.entries(votes)) {
+    if (!scores[pid]) scores[pid] = 0;
+    if (target === impostorName) scores[pid] += 1;
+  }
+  await roomRef.update({ scores, roundEnded: true });
+  const myVote = votes[playerId];
+  if (myVote) {
+    if (myVote === impostorName) showResult("🎉 GRATULACJE! Zgadłeś impostora!");
+    else showResult("😔 POMYŁKA! Ten gracz nie był impostorem.");
+  }
+}
+
+/* --- Impostor zgaduje hasło --- */
+document.getElementById("btnGuessWord").addEventListener("click", async () => {
+  const guess = document.getElementById("impostorGuess").value.trim();
+  if (!guess) return alert("Wpisz hasło!");
+  const snap = await roomRef.get();
+  const data = snap.val();
+  const word = data.word;
+  if (guess.toLowerCase() === word.toLowerCase()) {
+    await roomRef.update({ roundEnded: true });
+    showResult("🎯 IMPOSOTOR ODGADŁ HASŁO! KONIEC RUNDY!");
+  } else {
+    alert("Niepoprawne hasło!");
+  }
+});
+
 document.getElementById("btnCreate").addEventListener("click", createRoom);
-document.getElementById("btnJoin").addEventListener("click", joinRoom);
-document.getElementById("btnStart").addEventListener("click", startGame);
-document.getElementById("btnNextRound").addEventListener("click", nextRound);
-</script>
-</body>
-</html>
+document.getElementById("btnJoin").
