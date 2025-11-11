@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🕵️‍♂️ IMPOSTOR GAME</title>
 <style>
 body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #fff; text-align: center; margin: 0; padding: 0; }
@@ -14,12 +14,12 @@ input { font-size: 18px; padding: 12px; border-radius: 10px; border: 1px solid #
 .card { margin-top: 25px; padding: 25px; background: #161b22; border-radius: 20px; display: inline-block; font-size: 22px; color: #00d26a; text-shadow: 0 0 8px rgba(0,210,106,0.6); }
 #votePanel { margin-top: 20px; background: #1c222b; border-radius: 15px; padding: 20px; }
 #voteButtons button { display: block; width: 80%; max-width: 300px; margin: 10px auto; }
-#impostorGuessPanel input { width: 180px; margin-right: 10px; }
 </style>
 </head>
 <body>
 <h1>🕵️‍♂️ IMPOSTOR GAME</h1>
 
+<!-- MENU GŁÓWNE -->
 <div id="menu">
   <input id="playerName" placeholder="Twoje imię" />
   <button id="btnCreate">Stwórz grę</button>
@@ -28,6 +28,7 @@ input { font-size: 18px; padding: 12px; border-radius: 10px; border: 1px solid #
   <button id="btnJoin">Dołącz</button>
 </div>
 
+<!-- PANEL HOSTA -->
 <div id="hostPanel" class="hidden">
   <h2>Kod pokoju: <span id="roomCode"></span></h2>
   <p id="players">Gracze: 0/4</p>
@@ -35,13 +36,18 @@ input { font-size: 18px; padding: 12px; border-radius: 10px; border: 1px solid #
   <button id="btnStart">Rozdaj role</button>
 </div>
 
+<!-- PANEL OCZEKIWANIA -->
 <div id="waiting" class="hidden">
-  <h2>Oczekiwanie na rozpoczęcie...</h2>
+  <h2>Oczekiwanie na rozpoczęcie gry...</h2>
 </div>
 
+<!-- IMIĘ GRACZA -->
 <div id="myName" class="hidden card"></div>
+
+<!-- WYNIK / KOMUNIKAT -->
 <div id="result" class="hidden card"></div>
 
+<!-- PANEL GŁOSOWANIA -->
 <div id="votePanel" class="hidden card">
   <h3>Wybierz gracza, którego podejrzewasz:</h3>
   <div id="voteButtons"></div>
@@ -52,6 +58,7 @@ input { font-size: 18px; padding: 12px; border-radius: 10px; border: 1px solid #
   </div>
 </div>
 
+<!-- PANEL HASŁA (TYLKO DLA IMPOSTORA) -->
 <div id="impostorGuessPanel" class="hidden card">
   <h3>Wpisz hasło, aby zakończyć rundę:</h3>
   <input id="impostorWord" placeholder="Hasło" />
@@ -63,6 +70,7 @@ input { font-size: 18px; padding: 12px; border-radius: 10px; border: 1px solid #
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
+// 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyAy1mE_Q3fJo9W2Aa9EQUqp0L0Bn53XPHc",
   authDomain: "impostor-game-ebc12.firebaseapp.com",
@@ -75,28 +83,27 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// 🔧 Zmienne gry
 const words = ["ASTRONAUTA","PARAPET","KANIBAL","BETONIARKA","HIPOPOTAM","ŻAGLÓWKA","MAGNES","LAWENDA","ŻYRANDOL","ŻÓŁW","PIORUN","ROWERZYSTA","KOSMITA","SUSHI","MIŁOŚĆ","FILM","SPORT","POLICJA","DOM","PIES","KOT","TRAMWAJ","FOTOGRAF","PIANINO"];
 let playerId = Math.random().toString(36).substring(2,9);
-let roomRef = null;
 let playerName = "";
+let roomRef = null;
 let isHost = false;
 let hasVoted = false;
 let selectedVote = null;
 
 function randomCode(){return Math.floor(1000+Math.random()*9000).toString();}
-function showMyName(){const div=document.getElementById("myName");div.innerText="Twoje imię: "+playerName;div.classList.remove("hidden");}
-function showResult(text){const r=document.getElementById("result");r.innerText=text;r.classList.remove("hidden");}
+function showMyName(){const d=document.getElementById("myName");d.innerText="Twoje imię: "+playerName;d.classList.remove("hidden");}
+function showResult(txt){const r=document.getElementById("result");r.innerText=txt;r.classList.remove("hidden");}
 function hideResult(){document.getElementById("result").classList.add("hidden");}
 
-async function updatePlayerList(){
-  const snap=await roomRef.get();const data=snap.val();
-  const players=Object.values(data.players||{}).map(p=>p.name);
-  document.getElementById("playerList").innerText=players.join(", ");
-  document.getElementById("players").innerText=`Gracze: ${players.filter(p=>!p.includes("(HOST)")).length}/4`;
-}
+// 🔹 Ukryj wszystkie panele gry na starcie
+document.getElementById("votePanel").classList.add("hidden");
+document.getElementById("impostorGuessPanel").classList.add("hidden");
+hideResult();
 
-// Tworzenie pokoju
-window.createRoom=async function(){
+// 🔹 Tworzenie pokoju
+async function createRoom(){
   playerName=document.getElementById("playerName").value.trim();
   if(!playerName)return alert("Podaj imię!");
   playerName+=" (HOST)";
@@ -109,53 +116,63 @@ window.createRoom=async function(){
   document.getElementById("hostPanel").classList.remove("hidden");
   document.getElementById("roomCode").innerText=code;
   showMyName();
-  roomRef.on("value",snap=>{updatePlayerList();});
+  roomRef.on("value",snap=>updatePlayerList(snap.val()));
 }
 
-// Dołączenie
-window.joinRoom=async function(){
+// 🔹 Dołączanie do pokoju
+async function joinRoom(){
   playerName=document.getElementById("playerName").value.trim();
   if(!playerName)return alert("Podaj imię!");
   const code=document.getElementById("joinCode").value.trim();
   roomRef=db.ref("rooms/"+code);
-  const s=await roomRef.get();if(!s.exists())return alert("Pokój nie istnieje!");
+  const snap=await roomRef.get();
+  if(!snap.exists())return alert("Pokój nie istnieje!");
   await db.ref(`rooms/${code}/players/${playerId}`).set({name:playerName});
   document.getElementById("menu").classList.add("hidden");
   document.getElementById("waiting").classList.remove("hidden");
   showMyName();
   roomRef.on("value",snap=>{
-    const data=snap.val();updatePlayerList();
-    if(data.started&&data.roles&&data.word)handleGameData(data);
-    if(data.roundEnded)endRound(data);
+    const data=snap.val();
+    updatePlayerList(data);
+    if(data.started && data.roles && data.word) handleGameData(data);
+    if(data.roundEnded) endRound(data);
   });
 }
 
-// Start gry (host)
-window.startGame=async function(){
-  hideResult();hasVoted=false;selectedVote=null;
-  const s=await roomRef.get();const data=s.val();
+function updatePlayerList(data){
+  const list=Object.values(data.players||{}).map(p=>p.name);
+  document.getElementById("playerList").innerText=list.join(", ");
+  document.getElementById("players").innerText=`Gracze: ${list.filter(n=>!n.includes("(HOST)")).length}/4`;
+}
+
+// 🔹 Rozpoczęcie gry
+async function startGame(){
+  const snap=await roomRef.get();const data=snap.val();
   const players=Object.keys(data.players).filter(id=>!data.players[id].name.includes("(HOST)"));
   if(players.length<3)return alert("Potrzebujesz co najmniej 3 graczy!");
   const word=words[Math.floor(Math.random()*words.length)];
   const impostor=players[Math.floor(Math.random()*players.length)];
-  const roles={};players.forEach(p=>roles[p]=(p===impostor)?"impostor":"normal");
+  const roles={};
+  players.forEach(p=>roles[p]=(p===impostor)?"impostor":"normal");
   roles[playerId]="host";
   await roomRef.update({started:true,roles,word,votes:{},roundEnded:false,impostorWin:false});
   showResult("Runda rozpoczęta!");
 }
 
-// Logika gry
+// 🔹 Obsługa danych gry po starcie
 function handleGameData(data){
-  const role=data.roles[playerId];
   hideResult();
   document.getElementById("votePanel").classList.add("hidden");
   document.getElementById("impostorGuessPanel").classList.add("hidden");
-  if(role==="host"){showResult("👑 Jesteś hostem.");return;}
+  const role=data.roles[playerId];
+
+  if(role==="host"){ showResult("👑 Jesteś hostem. Czekaj na zakończenie rundy."); return; }
   if(role==="impostor"){
     showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
     document.getElementById("impostorGuessPanel").classList.remove("hidden");
     return;
   }
+
   showResult("🔤 Hasło: "+data.word);
   const allPlayers=Object.entries(data.players)
     .filter(([id,p])=>!p.name.includes("(HOST)") && data.roles[id]!=="impostor" && p.name!==playerName)
@@ -163,15 +180,16 @@ function handleGameData(data){
   setTimeout(()=>showVotePanel(allPlayers),2000);
 }
 
-// Panel głosowania
+// 🔹 Panel głosowania
 function showVotePanel(players){
-  const voteDiv=document.getElementById("voteButtons");
-  const confirm=document.getElementById("voteConfirm");
-  voteDiv.innerHTML="";confirm.classList.add("hidden");
+  const v=document.getElementById("voteButtons");
+  const c=document.getElementById("voteConfirm");
+  v.innerHTML="";c.classList.add("hidden");
   players.forEach(n=>{
     const b=document.createElement("button");
-    b.textContent=n;b.onclick=()=>selectVote(n);
-    voteDiv.appendChild(b);
+    b.textContent=n;
+    b.onclick=()=>selectVote(n);
+    v.appendChild(b);
   });
   document.getElementById("votePanel").classList.remove("hidden");
 }
@@ -181,12 +199,10 @@ function selectVote(name){
   document.getElementById("selectedName").innerText="Twój wybór: "+name;
   document.getElementById("voteConfirm").classList.remove("hidden");
 }
-
 document.getElementById("btnCancelVote").onclick=function(){
   selectedVote=null;
   document.getElementById("voteConfirm").classList.add("hidden");
 };
-
 document.getElementById("btnConfirmVote").onclick=async function(){
   if(!selectedVote||hasVoted)return;
   hasVoted=true;
@@ -196,45 +212,45 @@ document.getElementById("btnConfirmVote").onclick=async function(){
   checkAllVoted();
 };
 
+// 🔹 Sprawdzenie zakończenia głosowania
 async function checkAllVoted(){
   const s=await roomRef.get();const d=s.val();
   const eligible=Object.keys(d.roles).filter(id=>d.roles[id]!=="host"&&d.roles[id]!=="impostor");
   const votesCount=Object.keys(d.votes||{}).length;
-  if(votesCount>=eligible.length){await roomRef.update({roundEnded:true});}
+  if(votesCount>=eligible.length) await roomRef.update({roundEnded:true});
 }
 
+// 🔹 Panel hasła (tylko impostor)
 document.getElementById("submitWord").onclick=async function(){
   const val=document.getElementById("impostorWord").value.trim();
   const s=await roomRef.get();const d=s.val();
   if(val.toLowerCase()===d.word.toLowerCase()){
     await roomRef.update({roundEnded:true,impostorWin:true});
-  } else alert("Błędne hasło!");
+  } else alert("❌ Błędne hasło!");
 };
 
-// Zakończenie rundy
+// 🔹 Zakończenie rundy
 function endRound(data){
+  document.getElementById("votePanel").classList.add("hidden");
+  document.getElementById("impostorGuessPanel").classList.add("hidden");
+
   const impostorId=Object.keys(data.roles).find(id=>data.roles[id]==="impostor");
   const impostorName=data.players[impostorId].name;
   const votes=data.votes||{};
   const role=data.roles[playerId];
 
-  document.getElementById("impostorGuessPanel").classList.add("hidden");
-  document.getElementById("votePanel").classList.add("hidden");
-
-  if(data.impostorWin){
-    showResult("🕵️‍♂️ IMPOSTOR ODGADŁ HASŁO!");
-    return;
-  }
+  if(data.impostorWin){ showResult("🕵️‍♂️ IMPOSTOR ODGADŁ HASŁO!"); return; }
 
   if(role!=="host"){
     const myVote=votes[playerId];
-    if(myVote===impostorName){showResult("🎉 GRATULACJE! Zgadłeś impostora! +1 punkt");}
-    else{showResult("❌ POMYŁKA! Ten gracz nie był impostorem.");}
+    if(myVote===impostorName){ showResult("🎉 GRATULACJE! Zgadłeś impostora!"); }
+    else { showResult("❌ POMYŁKA! Ten gracz nie był impostorem."); }
   } else {
     showResult("Runda zakończona. Impostorem był: "+impostorName);
   }
 }
 
+// 🔹 Przypisanie przycisków
 document.getElementById("btnCreate").onclick=createRoom;
 document.getElementById("btnJoin").onclick=joinRoom;
 document.getElementById("btnStart").onclick=startGame;
