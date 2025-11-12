@@ -13,13 +13,7 @@ body {
   margin: 0; 
   padding: 0; 
 }
-
-h1 { 
-  color: #00d26a; 
-  margin-top: 40px; 
-  font-size: 42px; 
-}
-
+h1 { color: #00d26a; margin-top: 40px; font-size: 42px; }
 button { 
   background: #00d26a; 
   color: black; 
@@ -32,62 +26,14 @@ button {
   width: 80%; 
   max-width: 300px; 
 }
-button:hover { 
-  background: #00b85d; 
-}
-
-input { 
-  font-size: 20px; 
-  padding: 15px; 
-  border-radius: 10px; 
-  border: 1px solid #ccc; 
-  width: 80%; 
-  max-width: 300px; 
-  text-align: center; 
-  margin-bottom: 15px; 
-}
-
-#myName {
-  margin-top: 20px;
-  padding: 20px;
-  background: #1c222b;
-  border-radius: 15px;
-  box-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
-  font-size: 20px;
-  display: inline-block;
-}
-
-.card { 
-  margin-top: 30px; 
-  padding: 25px 30px; 
-  background: #161b22; 
-  border-radius: 20px; 
-  display: inline-block; 
-  font-size: 26px; 
-  font-weight: bold; 
-  color: #00d26a;
-  text-shadow: 0 0 8px rgba(0, 210, 106, 0.7);
-  max-width: 90%; 
-  word-wrap: break-word; 
-  transition: all 0.3s ease;
-}
-
+button:hover { background: #00b85d; }
+input { font-size: 20px; padding: 15px; border-radius: 10px; border: 1px solid #ccc; width: 80%; max-width: 300px; text-align: center; margin-bottom: 15px; }
+#myName { margin-top: 20px; padding: 20px; background: #1c222b; border-radius: 15px; box-shadow: 0 0 15px rgba(0, 210, 106, 0.4); font-size: 20px; display: inline-block; }
+.card { margin-top: 30px; padding: 25px 30px; background: #161b22; border-radius: 20px; display: inline-block; font-size: 26px; font-weight: bold; color: #00d26a; text-shadow: 0 0 8px rgba(0, 210, 106, 0.7); max-width: 90%; word-wrap: break-word; transition: all 0.3s ease; }
 .hidden { display: none; }
-
 /* Panel oskarżania */
-#accusePanel {
-  margin-top: 20px;
-  padding: 20px;
-  background: #1c1c1c;
-  border-radius: 15px;
-  display: inline-block;
-  text-align: center;
-}
-#accusePanel select, #accusePanel button {
-  font-size: 18px;
-  margin: 5px;
-  padding: 10px;
-}
+#accusePanel { margin-top: 30px; padding: 20px; background: #161b22; border-radius: 20px; display: inline-block; width: 90%; max-width: 400px; }
+#accusePanel select, #accusePanel button { font-size: 18px; padding: 10px; margin: 10px; }
 </style>
 </head>
 <body>
@@ -118,16 +64,15 @@ input {
 
 <!-- Panel oskarżania -->
 <div id="accusePanel" class="hidden card">
-  <h3>OSKARŻ IMPOSTORA</h3>
-  <select id="accuseSelect"></select><br>
+  <h3>⚠️ OSKARŻ IMPPOSTORA ⚠️</h3>
+  <select id="accuseSelect"></select>
+  <br>
   <button id="btnAccuse">Oskarż</button>
-  <button id="btnCancelAccuse">Anuluj</button>
+  <button id="btnCancelAccuse">Cofnij</button>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyAy1mE_Q3fJo9W2Aa9EQUqp0L0Bn53XPHc",
@@ -142,14 +87,15 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const words = ["ASTRONAUTA","PARAPET","KANIBAL","BETONIARKA","KAPSEL","HIPOPOTAM","TEŚCIOWA","ŻAGLÓWKA","ANTARKTYDA","MAGNEZ","WIEWIÓRKA","KARALUCH","PUDEŁKO","APOKALIPSA","CHMURKA","KREDENS","WIRUS","LAWENDA","KSEROKOPIARKA","ŻYRANDOL","KASZANKA","PARASOLKA","GILOTYNA","PANCERNIK","ŚRUBOKRĘT","SATELITA","KOCIOŁEK","DONICZKA","PIEKARNIK","SZACHISTA","GRZYBNIA","ANANAS","TRĄBKA","SPAGHETTI","MARCHEWKA","ŻÓŁW","ROLNIK","MIKROFON","BUMERANG","FOTOGRAF","ROBOT","TRAKTORZYSTA","BANAN","LUNETA","DŻUNGLA","PIANINO","PŁYTA","KURCZAK","GWOŹDZIE","CZAJNIK","BAJGIEL","TELESKOP","DRUKARKA","MRÓZ","SZYBA","KAMIEŃ","FORTEPIAN","LUSTERKO","SIEKIERA","LATARKA","KOŃCÓWKA","MIŚ","CZARODZIEJ","KALENDARZ","SOFA","MUSZTARDA","TRZMIEL","PĄCZEK","DINOZAUR","PLECAK","PERFUMY","KOSMITA","PIŻAMA","OGÓREK","ROWERZYSTA","KSIĘŻYC","PIORUN","FRYTKI","TELEWIZOR","SAMOLOT","SŁUCHAWKI","PIANISTA","ŻETON","CZEKOLADA","ŻOŁNIERZ","NURKOWANIE","MAGNES","KLEJ","PAJĄK","WAZON","TELEPORT","GUMA","PLAKAT","TORNADO","TŁUMACZ","SANKI","LAMPA","BĄBELEK","MAKARON","RAKIETA","OKO","DARMOZJAD","TIKTOK","MEM","NETFLIX","KRAJOBRAZ","ROWER","TULEJA","CARPATH","AGRECOL","HITLER","REWOLWER","STARUCH","SIGMA","SNAP","DISCORD","MINISTERSTWO","TRAMWAJ","WAKACJE","PARK","KOT","PIES","IPHONE","KOMPUTER","FRYZURA","EMOJI","POLICJA","BAN","FLEX","KANAPKA","DŁUGOPIS","KAKTUS","DRIP","DOMÓWKA","HERBATA","MIŁOŚĆ","GRA","FILM","SPORT","PRALKA","SUSHI","TEAM","FACEBOOK","YOUTUBE","POCIĄG","DOM","BUDYNEK","BRAMKA"];
+const words = ["ASTRONAUTA","PARAPET","KANIBAL","BETONIARKA","KAPSEL","HIPOPOTAM","TEŚCIOWA",
+"ŻAGLÓWKA","ANTARKTYDA","MAGNEZ","WIEWIÓRKA","KARALUCH","PUDEŁKO","APOKALIPSA",
+"CHMURKA","KREDENS","WIRUS","LAWENDA","KSEROKOPIARKA","ŻYRANDOL","KASZANKA"];
 
 let playerId = Math.random().toString(36).substring(2,9);
 let roomRef = null;
 let isHost = false;
 let playerName = "";
 let hasAccused = false;
-let votingData = null;
 
 function randomCode() { return Math.floor(1000 + Math.random() * 9000).toString(); }
 
@@ -160,42 +106,45 @@ function showMyName() {
 }
 
 function showResult(text) {
-  document.getElementById("result").innerText = text;
-  document.getElementById("result").classList.remove("hidden");
+  const res = document.getElementById("result");
+  res.innerText = text;
+  res.classList.remove("hidden");
 }
 
 async function updatePlayerList() {
   const snap = await roomRef.get();
   const data = snap.val();
-  const playersList = data.players ? Object.values(data.players).map(p => p.name) : [];
+  const playersList = data.players ? Object.entries(data.players).map(([id,p]) => `${p.name}${id===playerId?' (TY)':''}`) : [];
   document.getElementById("playerList").innerText = playersList.join(", ");
   const nonHostCount = playersList.filter(n => !n.includes("(HOST)")).length;
   document.getElementById("players").innerText = `Gracze: ${nonHostCount}/4`;
 
-  // Aktualizacja panelu oskarżania
-  const select = document.getElementById("accuseSelect");
-  select.innerHTML = "";
-  Object.entries(data.players || {}).forEach(([id, p]) => {
-    if(id !== playerId && !p.name.includes("(HOST)")) {
-      const opt = document.createElement("option");
-      opt.value = id;
-      opt.text = p.name;
-      select.add(opt);
+  // Wypełnij select do oskarżania
+  if(data.started && !isHost) {
+    const select = document.getElementById("accuseSelect");
+    select.innerHTML = "";
+    for(const [id,p] of Object.entries(data.players)) {
+      if(id!==playerId && !p.name.includes("(HOST)")) {
+        const option = document.createElement("option");
+        option.value = id;
+        option.innerText = p.name;
+        select.appendChild(option);
+      }
     }
-  });
+  }
 }
 
-// Tworzenie pokoju
+// --- Tworzenie i dołączanie do pokoju ---
 window.createRoom = async function() {
   playerName = document.getElementById("playerName").value.trim();
-  if (!playerName) return alert("Podaj imię!");
+  if(!playerName) return alert("Podaj imię!");
   playerName += " (HOST)";
   isHost = true;
   showMyName();
 
   const code = randomCode();
-  roomRef = db.ref("rooms/" + code);
-  await roomRef.set({ players: {}, started: false });
+  roomRef = db.ref("rooms/"+code);
+  await roomRef.set({ players:{}, started:false });
 
   document.getElementById("menu").classList.add("hidden");
   document.getElementById("hostPanel").classList.remove("hidden");
@@ -204,157 +153,126 @@ window.createRoom = async function() {
   const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
   await playerRef.set({ name: playerName });
 
-  roomRef.on("value", async snapshot => {
-    await updatePlayerList();
-    const data = snapshot.val();
-    if (data.started && data.roles && data.word) {
-      const role = data.roles[playerId];
-      if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
-      else if (role !== "host") showResult(`🔤 Hasło: ${data.word}`);
-    }
-  });
+  roomRef.on("value", snapshot => { updatePlayerList(); });
 }
 
-// Dołączenie do pokoju
 window.joinRoom = async function() {
   playerName = document.getElementById("playerName").value.trim();
-  if (!playerName) return alert("Podaj imię!");
+  if(!playerName) return alert("Podaj imię!");
   showMyName();
 
   const code = document.getElementById("joinCode").value.trim();
-  if (!code) return alert("Podaj kod pokoju!");
-  roomRef = db.ref("rooms/" + code);
+  if(!code) return alert("Podaj kod pokoju!");
+  roomRef = db.ref("rooms/"+code);
 
-  roomRef.get().then(async snapshot => {
-    if (!snapshot.exists()) return alert("Pokój nie istnieje!");
+  const snap = await roomRef.get();
+  if(!snap.exists()) return alert("Pokój nie istnieje!");
+  
+  const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
+  await playerRef.set({ name: playerName });
 
-    const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
-    playerRef.set({ name: playerName });
+  document.getElementById("menu").classList.add("hidden");
+  document.getElementById("waiting").classList.remove("hidden");
 
-    document.getElementById("menu").classList.add("hidden");
-    document.getElementById("waiting").classList.remove("hidden");
+  roomRef.on("value", snapshot => {
+    const data = snapshot.val();
+    updatePlayerList();
 
-    roomRef.on("value", snapshot => {
-      updatePlayerList();
-      const data = snapshot.val();
-      if (data.started && data.roles && data.word) {
-        const role = data.roles[playerId];
-        if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
-        else if (role !== "host") showResult(`🔤 Hasło: ${data.word}`);
-      }
-    });
+    if(data.started && data.roles && data.word) {
+      const role = data.roles[playerId];
+      if(role==="impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
+      else if(role!=="host") showResult(`🔤 Hasło: ${data.word}`);
+
+      if(role!=="host") document.getElementById("accusePanel").classList.remove("hidden");
+    }
+
+    // Sprawdź czy trwa głosowanie
+    if(data.voting && data.voting.accused) handleVoting(data.voting);
   });
 }
 
-// Rozpoczęcie gry (host)
+// --- Rozpoczęcie gry ---
 window.startGame = async function() {
   const snap = await roomRef.get();
   const data = snap.val();
   const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
-  if (players.length !== 4) return alert("Musi być dokładnie 4 graczy (bez hosta)!");
+  if(players.length!==4) return alert("Musi być dokładnie 4 graczy (bez hosta)!");
 
-  const word = words[Math.floor(Math.random() * words.length)];
-  const impostor = players[Math.floor(Math.random() * players.length)];
+  const word = words[Math.floor(Math.random()*words.length)];
+  const impostor = players[Math.floor(Math.random()*players.length)];
   const roles = {};
-  players.forEach(p => roles[p] = p === impostor ? "impostor" : "normal");
-  roles[playerId] = "host";
+  players.forEach(p=>roles[p]=p===impostor?"impostor":"normal");
+  roles[playerId]="host";
 
-  await roomRef.update({ started: true, roles, word });
+  await roomRef.update({ started:true, roles, word });
   document.getElementById("btnNextRound").classList.remove("hidden");
-  showResult("Runda rozpoczęta!");
-  document.getElementById("accusePanel").classList.remove("hidden");
+  showResult("🎮 Runda rozpoczęta!");
+  hasAccused = false;
 }
 
-// Rozlosowanie kolejnej rundy (host)
+// --- Kolejna runda ---
 window.nextRound = async function() {
   const snap = await roomRef.get();
   const data = snap.val();
   const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
 
-  const word = words[Math.floor(Math.random() * words.length)];
-  const impostor = players[Math.floor(Math.random() * players.length)];
+  const word = words[Math.floor(Math.random()*words.length)];
+  const impostor = players[Math.floor(Math.random()*players.length)];
   const roles = {};
-  players.forEach(p => roles[p] = p === impostor ? "impostor" : "normal");
-  roles[playerId] = "host";
+  players.forEach(p=>roles[p]=p===impostor?"impostor":"normal");
+  roles[playerId]="host";
 
-  await roomRef.update({ started: true, roles, word });
+  await roomRef.update({ started:true, roles, word, voting:null });
   document.getElementById("result").classList.add("hidden");
-  document.getElementById("accusePanel").classList.remove("hidden");
   hasAccused = false;
 }
 
-// --- OBSŁUGA OSKARŻANIA ---
-document.getElementById("btnAccuse").addEventListener("click", async () => {
-  if(hasAccused) return alert("Już oskarżyłeś w tej rundzie!");
+// --- Oskarżanie ---
+document.getElementById("btnAccuse").addEventListener("click", async ()=>{
+  if(hasAccused) return alert("Możesz oskarżać tylko raz na rundę!");
   const accusedId = document.getElementById("accuseSelect").value;
-  if(!accusedId) return alert("Wybierz gracza do oskarżenia!");
+  if(!accusedId) return alert("Wybierz gracza!");
+  
+  const voting = { accused: accusedId, votes: {} };
+  voting.votes[playerId] = true; // oskarżający głosuje automatycznie
+  await roomRef.update({ voting });
+  hasAccused = true;
+  showResult("⏳ TRWA GŁOSOWANIE");
+  document.getElementById("accusePanel").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+});
 
-  votingData = {
-    accused: accusedId,
-    votes: {},
-    completed: false
-  };
+document.getElementById("btnCancelAccuse").addEventListener("click", ()=>{
+  document.getElementById("accusePanel").classList.add("hidden");
+});
 
+async function handleVoting(voting) {
   const snap = await roomRef.get();
   const data = snap.val();
-  Object.keys(data.players).forEach(pid => {
-    if(pid === playerId || pid === accusedId) votingData.votes[pid] = true;
-    else votingData.votes[pid] = null;
-  });
+  const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
+  
+  if(!voting.votes[playerId] && playerId!==voting.accused && !isHost) {
+    voting.votes[playerId] = true; // oddanie głosu za
+    await roomRef.update({ voting });
+  }
 
-  await roomRef.child("voting").set(votingData);
-  hasAccused = true;
-  alert("🟢 TRWA GŁOSOWANIE");
-  await roomRef.child("players").child(accusedId).update({ alert: "ZOSTAŁEŚ OSKARŻONY" });
-});
+  // sprawdź czy wszyscy zagłosowali
+  if(Object.keys(voting.votes).length >= players.length) {
+    const accusedName = data.players[voting.accused].name;
+    let impostorId = Object.keys(data.roles).find(id=>data.roles[id]==="impostor");
+    let message = `✅ Wszyscy zagłosowali ZA! Gracz ${accusedName} został wskazany.\n`;
+    if(voting.accused===impostorId) message += `🎉 Gracz ${accusedName} był impostorem!`;
+    else message += `❌ Niestety to nie był impostor.`;
+    showResult(message);
 
-document.getElementById("btnCancelAccuse").addEventListener("click", () => {
-  document.getElementById("accuseSelect").selectedIndex = 0;
-});
-
-// Słuchanie zmian w głosowaniu
-function listenVoting() {
-  roomRef.child("voting").on("value", snapshot => {
-    const vote = snapshot.val();
-    if(!vote) return;
-    const myVote = vote.votes[playerId];
-    if(myVote === null) {
-      const agree = confirm(`Ktoś oskarżył gracza! Chcesz zagłosować ZA?`);
-      vote.votes[playerId] = agree;
-      roomRef.child("voting").set(vote);
-    }
-
-    const allVoted = Object.values(vote.votes).every(v => v !== null);
-    if(allVoted && !vote.completed) {
-      vote.completed = true;
-      roomRef.child("voting").set(vote);
-
-      const allYes = Object.values(vote.votes).every(v => v === true);
-      roomRef.child("roles").get().then(rSnap => {
-        const roles = rSnap.val();
-        const accusedName = Object.values(data.players || {}).find(p => p.id === vote.accused)?.name || "???";
-        if(allYes) {
-          const impostorName = Object.values(roles).find((v, k) => k === vote.accused) === "impostor";
-          if(roles[vote.accused] === "impostor") {
-            alert(`✅ Wszyscy zagłosowali ZA! Gracz ${Object.values(data.players).find(p => p.id===vote.accused)?.name} był impostorem.`);
-          } else {
-            alert(`✅ Wszyscy zagłosowali ZA! Niestety to nie był impostor`);
-          }
-        } else {
-          alert(`❌ Oskarżenie nie przeszło.`);
-        }
-      });
-    }
-  });
+    await roomRef.update({ voting:null });
+  }
 }
 
-// --- WYWOŁANIE --- 
 document.getElementById("btnCreate").addEventListener("click", createRoom);
 document.getElementById("btnJoin").addEventListener("click", joinRoom);
 document.getElementById("btnStart").addEventListener("click", startGame);
 document.getElementById("btnNextRound").addEventListener("click", nextRound);
-
-listenVoting();
 </script>
 </body>
 </html>
