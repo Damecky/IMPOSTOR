@@ -272,6 +272,110 @@ document.getElementById("btnNextRound").addEventListener("click", nextRound);
 </body>
 </html>
 
+<!-- ... Twój obecny HTML do <body> ... -->
+
+<!-- Panel Oskarżania -->
+<div id="accusePanel" class="hidden card">
+  <h2>🕵️‍♂️ OSKARŻ IMPOSITORA</h2>
+  <select id="accuseSelect"></select>
+  <div style="margin-top:15px;">
+    <button id="btnAccuse">Zatwierdź</button>
+    <button id="btnCancelAccuse">Cofnij</button>
+  </div>
+</div>
+
+<script>
+let hasAccused = false;
+let currentAccusation = null;
+
+// Wyświetl panel oskarżania (po dołączeniu do pokoju)
+function showAccusePanel(players) {
+  if (hasAccused) return;
+  const panel = document.getElementById("accusePanel");
+  const select = document.getElementById("accuseSelect");
+  select.innerHTML = "";
+  players.forEach(p => {
+    if (p.id !== playerId && !p.name.includes("(HOST)")) {
+      const option = document.createElement("option");
+      option.value = p.id;
+      option.innerText = p.name;
+      select.appendChild(option);
+    }
+  });
+  panel.classList.remove("hidden");
+}
+
+// Funkcja wywoływana po kliknięciu Zatwierdź
+document.getElementById("btnAccuse").addEventListener("click", async () => {
+  if (hasAccused) return;
+  const accusedId = document.getElementById("accuseSelect").value;
+  if (!accusedId) return alert("Wybierz gracza!");
+  currentAccusation = accusedId;
+  hasAccused = true;
+  document.getElementById("accusePanel").classList.add("hidden");
+
+  // Dodaj oskarżenie w bazie
+  await roomRef.child("accusation").set({
+    accuser: playerId,
+    accused: accusedId,
+    votes: { [playerId]: true }
+  });
+
+  // Komunikat dla oskarżającego
+  alert("⏳ TRWA GŁOSOWANIE!");
+
+  // Komunikat dla oskarżonego
+  const accusedName = (await roomRef.child(`players/${accusedId}`).get()).val().name;
+  alert(`⚠️ ZOSTAŁEŚ OSKARŻONY: ${accusedName}`);
+
+  // Powiadomienie dla reszty graczy
+  roomRef.child("players").get().then(snapshot => {
+    const playersObj = snapshot.val();
+    Object.keys(playersObj).forEach(pid => {
+      if (pid !== playerId && pid !== accusedId && !playersObj[pid].name.includes("(HOST)")) {
+        alert(`🚨 HEJ, ON JEST IMPOSITOREM! ${accusedName}`);
+      }
+    });
+  });
+});
+
+// Cofnij
+document.getElementById("btnCancelAccuse").addEventListener("click", () => {
+  currentAccusation = null;
+  hasAccused = false;
+  document.getElementById("accusePanel").classList.add("hidden");
+});
+
+// Słuchanie głosów
+roomRef.child("accusation").on("value", async snapshot => {
+  const data = snapshot.val();
+  if (!data) return;
+
+  const playersSnap = await roomRef.child("players").get();
+  const playersObj = playersSnap.val();
+  const totalVotes = Object.keys(playersObj).filter(pid => pid !== data.accused && !playersObj[pid].name.includes("(HOST)")).length;
+  const votesCount = Object.keys(data.votes || {}).length;
+
+  if (votesCount === totalVotes + 1) { // +1 bo oskarżający głosuje automatycznie
+    // Wszyscy zagłosowali TAK
+    const accusedRoleSnap = await roomRef.child(`roles/${data.accused}`).get();
+    const accusedRole = accusedRoleSnap.val();
+    if (accusedRole === "impostor") {
+      alert(`✅ Wszyscy zagłosowali ZA! Gracz ${(await roomRef.child(`players/${data.accused}`).get()).val().name} był impostorem.`);
+    } else {
+      alert(`❌ Wszyscy zagłosowali ZA! Niestety to nie był impostor.`);
+    }
+
+    // Reset oskarżenia i zakończenie rundy
+    await roomRef.child("accusation").remove();
+    hasAccused = false;
+    currentAccusation = null;
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("accusePanel").classList.add("hidden");
+  }
+});
+</script>
+
 
 
 
