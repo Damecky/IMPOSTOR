@@ -3,19 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>🕵️‍♂️ Impostor Game</title>
+<title>🕵️‍♂️ IMPOSTOR GAME</title>
 <style>
-body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #fff; text-align: center; margin: 0; padding: 0; }
-h1 { color: #00d26a; margin-top: 30px; font-size: 28px; }
-button { background: #00d26a; color: black; border: none; border-radius: 12px; padding: 20px 40px; font-size: 20px; margin: 15px 0; cursor: pointer; width: 80%; max-width: 300px; }
-button:hover { background: #00b85d; }
-input { font-size: 20px; padding: 15px; border-radius: 10px; border: 1px solid #ccc; width: 80%; max-width: 300px; text-align: center; margin-bottom: 15px; }
+body { 
+  font-family: 'Segoe UI', sans-serif; 
+  background: #0d1117; 
+  color: #fff; 
+  text-align: center; 
+  margin: 0; 
+  padding: 0; 
+}
+
+/* Większy tytuł i emoji */
+h1 { 
+  color: #00d26a; 
+  margin-top: 40px; 
+  font-size: 42px; 
+}
+
+/* Przyciski */
+button { 
+  background: #00d26a; 
+  color: black; 
+  border: none; 
+  border-radius: 12px; 
+  padding: 20px 40px; 
+  font-size: 20px; 
+  margin: 15px 0; 
+  cursor: pointer; 
+  width: 80%; 
+  max-width: 300px; 
+}
+button:hover { 
+  background: #00b85d; 
+}
+
+/* Pola tekstowe */
+input { 
+  font-size: 20px; 
+  padding: 15px; 
+  border-radius: 10px; 
+  border: 1px solid #ccc; 
+  width: 80%; 
+  max-width: 300px; 
+  text-align: center; 
+  margin-bottom: 15px; 
+}
+
+/* Panel gracza z lekkim efektem świecenia */
+#myName {
+  margin-top: 20px;
+  padding: 20px;
+  background: #1c222b;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
+  font-size: 20px;
+  display: inline-block;
+}
+
+/* Karta z hasłem — wyróżniona */
+.card { 
+  margin-top: 30px; 
+  padding: 25px 30px; 
+  background: #161b22; 
+  border-radius: 20px; 
+  display: inline-block; 
+  font-size: 26px; 
+  font-weight: bold; 
+  color: #00d26a;
+  text-shadow: 0 0 8px rgba(0, 210, 106, 0.7);
+  max-width: 90%; 
+  word-wrap: break-word; 
+  transition: all 0.3s ease;
+}
+
 .hidden { display: none; }
-.card { margin-top: 30px; padding: 20px; background: #161b22; border-radius: 20px; display: inline-block; font-size: 22px; max-width: 90%; word-wrap: break-word; }
 </style>
 </head>
 <body>
-<h1>🕵️‍♂️ Impostor Game</h1>
+<h1>🕵️‍♂️ IMPOSTOR GAME</h1>
 
 <div id="menu">
   <input id="playerName" placeholder="Twoje imię" />
@@ -40,6 +106,7 @@ input { font-size: 20px; padding: 15px; border-radius: 10px; border: 1px solid #
 <div id="myName" class="hidden card"></div>
 <div id="result" class="hidden card"></div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -57,7 +124,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const words = ["TikTok","mem","Netflix","lody","rower","żaba","cebula","pączek","pizza","drama","uwu","sigma","snap","Discord","YouTube","szkoła","tramwaj","wakacje","park","kot","pies","telefon","komputer","fryzura","emoji","Chad","Sigma face","ban","flex","kanapka","długopis","kaktus","drip","domówka","herbata","miłość","gra","keyboard","film","sport","pralka","sushi","team","keyboard","muzyka","Spotify","pociąg"];
+const words = ["OKO","DARMOZJAD","TIKTOK","MEM","NETFLIX","LODY","ROWER","ŻABKA","CARPATH","AGRECOL","PIZZA","PASTA","STARUCH","SIGMA","SNAP","DISCORD","SZKOŁA","TRAMWAJ","WAKACJE","PARK","KOT","PIES","IPHONE","KOMPUTER","FRYZURA","EMOJI","POLICJA","BAN","FLEX","KANAPKA","DŁUGOPIS","KAKTUS","DRIP","DOMÓWKA","HERBATA","MIŁOŚĆ","GRA","FILM","SPORT","PRALKA","SUSHI","TEAM","FACEBOOK","YOUTUBE","POCIĄG","DOM","BUDYNEK","BRAMKA"];
 
 let playerId = Math.random().toString(36).substring(2,9);
 let roomRef = null;
@@ -75,6 +142,11 @@ function showMyName() {
 function showResult(text) {
   document.getElementById("result").innerText = text;
   document.getElementById("result").classList.remove("hidden");
+
+  const waitingDiv = document.getElementById("waiting");
+  if (!waitingDiv.classList.contains("hidden")) {
+    waitingDiv.querySelector("h2").innerText = "ZGADNIJ IMPOSTORA";
+  }
 }
 
 async function updatePlayerList() {
@@ -180,7 +252,6 @@ window.nextRound = async function() {
   await roomRef.update({ started: true, roles, word });
   document.getElementById("result").classList.add("hidden");
 }
-
 document.getElementById("btnCreate").addEventListener("click", createRoom);
 document.getElementById("btnJoin").addEventListener("click", joinRoom);
 document.getElementById("btnStart").addEventListener("click", startGame);
