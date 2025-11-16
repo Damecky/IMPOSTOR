@@ -1,1 +1,261 @@
-<!DOCTYPE html> <html lang="pl"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"> <title>🕵️‍♂️ IMPOSTOR GAME</title> <style> body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #fff; text-align: center; margin: 0; padding: 0; } /* Większy tytuł i emoji */ h1 { color: #00d26a; margin-top: 40px; font-size: 42px; } /* Przyciski */ button { background: #00d26a; color: black; border: none; border-radius: 12px; padding: 20px 40px; font-size: 20px; margin: 15px 0; cursor: pointer; width: 80%; max-width: 300px; } button:hover { background: #00b85d; } /* Pola tekstowe */ input { font-size: 20px; padding: 15px; border-radius: 10px; border: 1px solid #ccc; width: 80%; max-width: 300px; text-align: center; margin-bottom: 15px; } /* Panel gracza z lekkim efektem świecenia */ #myName { margin-top: 20px; padding: 20px; background: #1c222b; border-radius: 15px; box-shadow: 0 0 15px rgba(0, 210, 106, 0.4); font-size: 20px; display: inline-block; } /* Karta z hasłem — wyróżniona */ .card { margin-top: 30px; padding: 25px 30px; background: #161b22; border-radius: 20px; display: inline-block; font-size: 26px; font-weight: bold; color: #00d26a; text-shadow: 0 0 8px rgba(0, 210, 106, 0.7); max-width: 90%; word-wrap: break-word; transition: all 0.3s ease; } .hidden { display: none; } </style> </head> <body> <h1>🕵️‍♂️ IMPOSTOR GAME</h1> <div id="menu"> <input id="playerName" placeholder="Twoje imię" /> <button id="btnCreate">Stwórz grę</button> <p style="margin:10px 0;">lub</p> <input id="joinCode" placeholder="Kod pokoju" /> <button id="btnJoin">Dołącz</button> </div> <div id="hostPanel" class="hidden"> <h2>Kod pokoju: <span id="roomCode"></span></h2> <p id="players">Gracze: 0/4</p> <p id="playerList"></p> <button id="btnStart">Rozdaj role</button> <button id="btnNextRound" class="hidden">Rozlosuj kolejną rundę</button> </div> <div id="waiting" class="hidden"> <h2>Oczekiwanie na rozpoczęcie...</h2> </div> <div id="myName" class="hidden card"></div> <div id="result" class="hidden card"></div> <!-- Firebase --> <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script> <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script> <script> const firebaseConfig = { apiKey: "AIzaSyAy1mE_Q3fJo9W2Aa9EQUqp0L0Bn53XPHc", authDomain: "impostor-game-ebc12.firebaseapp.com", databaseURL: "https://impostor-game-ebc12-default-rtdb.europe-west1.firebasedatabase.app/", projectId: "impostor-game-ebc12", storageBucket: "impostor-game-ebc12.appspot.com", messagingSenderId: "561452405867", appId: "1:561452405867:web:24fb4cdf0320c2c3488d2e", measurementId: "G-DKBLTBFHJ5" }; firebase.initializeApp(firebaseConfig); const db = firebase.database(); const words = ["ASTRONAUTA","PARAPET","KANIBAL","BETONIARKA","KAPSEL","HIPOPOTAM","TEŚCIOWA", "ŻAGLÓWKA","ANTARKTYDA","MAGNEZ","WIEWIÓRKA","KARALUCH","PUDEŁKO","APOKALIPSA", "CHMURKA","KREDENS","WIRUS","LAWENDA","KSEROKOPIARKA","ŻYRANDOL","KASZANKA", "PARASOLKA","GILOTYNA","PANCERNIK","ŚRUBOKRĘT","SATELITA","KOCIOŁEK","DONICZKA", "PIEKARNIK","SZACHISTA","GRZYBNIA","ANANAS","TRĄBKA","SPAGHETTI","MARCHEWKA", "ŻÓŁW","ROLNIK","MIKROFON","BUMERANG","FOTOGRAF","ROBOT","TRAKTORZYSTA","BANAN", "LUNETA","DŻUNGLA","PIANINO","PŁYTA","KURCZAK","GWOŹDZIE","CZAJNIK","BAJGIEL", "TELESKOP","DRUKARKA","MRÓZ","SZYBA","KAMIEŃ","FORTEPIAN","LUSTERKO","SIEKIERA", "LATARKA","KOŃCÓWKA","MIŚ","CZARODZIEJ","KALENDARZ","SOFA","MUSZTARDA","TRZMIEL", "PĄCZEK","DINOZAUR","PLECAK","PERFUMY","KOSMITA","PIŻAMA","OGÓREK","ROWERZYSTA", "KSIĘŻYC","PIORUN","FRYTKI","TELEWIZOR","SAMOLOT","SŁUCHAWKI","PIANISTA","ŻETON", "CZEKOLADA","ŻOŁNIERZ","NURKOWANIE","MAGNES","KLEJ","PAJĄK","WAZON","TELEPORT", "GUMA","PLAKAT","TORNADO","TŁUMACZ","SANKI","LAMPA","BĄBELEK","MAKARON","RAKIETA","OKO","DARMOZJAD","TIKTOK","MEM","NETFLIX","KRAJOBRAZ","ROWER","TULEJA","CARPATH","AGRECOL","HITLER","REWOLWER","STARUCH","SIGMA","SNAP","DISCORD","MINISTERSTWO","TRAMWAJ","WAKACJE","PARK","KOT","PIES","IPHONE","KOMPUTER","FRYZURA","EMOJI","POLICJA","BAN","FLEX","KANAPKA","DŁUGOPIS","KAKTUS","DRIP","DOMÓWKA","HERBATA","MIŁOŚĆ","GRA","FILM","SPORT","PRALKA","SUSHI","TEAM","FACEBOOK","YOUTUBE","POCIĄG","DOM","BUDYNEK","BRAMKA"]; let playerId = Math.random().toString(36).substring(2,9); let roomRef = null; let isHost = false; let playerName = ""; function randomCode() { return Math.floor(1000 + Math.random() * 9000).toString(); } function showMyName() { const nameDiv = document.getElementById("myName"); nameDiv.innerText = Twoje imię: ${playerName}; nameDiv.classList.remove("hidden"); } function showResult(text) { document.getElementById("result").innerText = text; document.getElementById("result").classList.remove("hidden"); const waitingDiv = document.getElementById("waiting"); if (!waitingDiv.classList.contains("hidden")) { waitingDiv.querySelector("h2").innerText = "ZGADNIJ IMPOSTORA"; } } async function updatePlayerList() { const snap = await roomRef.get(); const data = snap.val(); const playersList = data.players ? Object.values(data.players).map(p => p.name) : []; document.getElementById("playerList").innerText = playersList.join(", "); const nonHostCount = playersList.filter(n => !n.includes("(HOST)")).length; document.getElementById("players").innerText = Gracze: ${nonHostCount}/4; } // Tworzenie pokoju window.createRoom = async function() { playerName = document.getElementById("playerName").value.trim(); if (!playerName) return alert("Podaj imię!"); playerName += " (HOST)"; isHost = true; showMyName(); const code = randomCode(); roomRef = db.ref("rooms/" + code); await roomRef.set({ players: {}, started: false }); document.getElementById("menu").classList.add("hidden"); document.getElementById("hostPanel").classList.remove("hidden"); document.getElementById("roomCode").innerText = code; const playerRef = db.ref(rooms/${code}/players/${playerId}); await playerRef.set({ name: playerName }); roomRef.on("value", async snapshot => { await updatePlayerList(); const data = snapshot.val(); if (data.started && data.roles && data.word) { const role = data.roles[playerId]; if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!"); else if (role !== "host") showResult(🔤 Hasło: ${data.word}); } }); } // Dołączenie do pokoju window.joinRoom = async function() { playerName = document.getElementById("playerName").value.trim(); if (!playerName) return alert("Podaj imię!"); showMyName(); const code = document.getElementById("joinCode").value.trim(); if (!code) return alert("Podaj kod pokoju!"); roomRef = db.ref("rooms/" + code); roomRef.get().then(async snapshot => { if (!snapshot.exists()) return alert("Pokój nie istnieje!"); const playerRef = db.ref(rooms/${code}/players/${playerId}); playerRef.set({ name: playerName }); document.getElementById("menu").classList.add("hidden"); document.getElementById("waiting").classList.remove("hidden"); roomRef.on("value", snapshot => { updatePlayerList(); const data = snapshot.val(); if (data.started && data.roles && data.word) { const role = data.roles[playerId]; if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!"); else if (role !== "host") showResult(🔤 Hasło: ${data.word}); } }); }); } // Rozpoczęcie gry (host) window.startGame = async function() { const snap = await roomRef.get(); const data = snap.val(); const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)")); if (players.length !== 4) return alert("Musi być dokładnie 4 graczy (bez hosta)!"); const word = words[Math.floor(Math.random() * words.length)]; const impostor = players[Math.floor(Math.random() * players.length)]; const roles = {}; players.forEach(p => roles[p] = p === impostor ? "impostor" : "normal"); roles[playerId] = "host"; await roomRef.update({ started: true, roles, word }); document.getElementById("btnNextRound").classList.remove("hidden"); showResult("Runda rozpoczęta!"); } // Rozlosowanie kolejnej rundy (host) window.nextRound = async function() { const snap = await roomRef.get(); const data = snap.val(); const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)")); const word = words[Math.floor(Math.random() * words.length)]; const impostor = players[Math.floor(Math.random() * players.length)]; const roles = {}; players.forEach(p => roles[p] = p === impostor ? "impostor" : "normal"); roles[playerId] = "host"; await roomRef.update({ started: true, roles, word }); document.getElementById("result").classList.add("hidden"); } document.getElementById("btnCreate").addEventListener("click", createRoom); document.getElementById("btnJoin").addEventListener("click", joinRoom); document.getElementById("btnStart").addEventListener("click", startGame); document.getElementById("btnNextRound").addEventListener("click", nextRound); </script> </body> </html>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🕵️‍♂️ IMPOSTOR GAME</title>
+<style>
+body { 
+  font-family: 'Segoe UI', sans-serif; 
+  background: #0d1117; 
+  color: #fff; 
+  text-align: center; 
+  margin: 0; 
+  padding: 0; 
+}
+
+/* Większy tytuł i emoji */
+h1 { 
+  color: #00d26a; 
+  margin-top: 40px; 
+  font-size: 42px; 
+}
+
+/* Przyciski */
+button { 
+  background: #00d26a; 
+  color: black; 
+  border: none; 
+  border-radius: 12px; 
+  padding: 20px 40px; 
+  font-size: 20px; 
+  margin: 15px 0; 
+  cursor: pointer; 
+  width: 80%; 
+  max-width: 300px; 
+}
+button:hover { 
+  background: #00b85d; 
+}
+
+/* Pola tekstowe */
+input { 
+  font-size: 20px; 
+  padding: 15px; 
+  border-radius: 10px; 
+  border: 1px solid #ccc; 
+  width: 80%; 
+  max-width: 300px; 
+  text-align: center; 
+  margin-bottom: 15px; 
+}
+
+/* Panel gracza z lekkim efektem świecenia */
+#myName {
+  margin-top: 20px;
+  padding: 20px;
+  background: #1c222b;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
+  font-size: 20px;
+  display: inline-block;
+}
+
+/* Karta z hasłem — wyróżniona */
+.card { 
+  margin-top: 30px; 
+  padding: 25px 30px; 
+  background: #161b22; 
+  border-radius: 20px; 
+  display: inline-block; 
+  font-size: 26px; 
+  font-weight: bold; 
+  color: #00d26a;
+  text-shadow: 0 0 8px rgba(0, 210, 106, 0.7);
+  max-width: 90%; 
+  word-wrap: break-word; 
+  transition: all 0.3s ease;
+}
+
+.hidden { display: none; }
+</style>
+</head>
+<body>
+<h1>🕵️‍♂️ IMPOSTOR GAME</h1>
+
+<div id="menu">
+  <input id="playerName" placeholder="Twoje imię" />
+  <button id="btnCreate">Stwórz grę</button>
+  <p style="margin:10px 0;">lub</p>
+  <input id="joinCode" placeholder="Kod pokoju" />
+  <button id="btnJoin">Dołącz</button>
+</div>
+
+<div id="hostPanel" class="hidden">
+  <h2>Kod pokoju: <span id="roomCode"></span></h2>
+  <p id="players">Gracze: 0/4</p>
+  <p id="playerList"></p>
+  <button id="btnStart">Rozdaj role</button>
+  <button id="btnNextRound" class="hidden">Rozlosuj kolejną rundę</button>
+</div>
+
+<div id="waiting" class="hidden">
+  <h2>Oczekiwanie na rozpoczęcie...</h2>
+</div>
+
+<div id="myName" class="hidden card"></div>
+<div id="result" class="hidden card"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAy1mE_Q3fJo9W2Aa9EQUqp0L0Bn53XPHc",
+  authDomain: "impostor-game-ebc12.firebaseapp.com",
+  databaseURL: "https://impostor-game-ebc12-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "impostor-game-ebc12",
+  storageBucket: "impostor-game-ebc12.appspot.com",
+  messagingSenderId: "561452405867",
+  appId: "1:561452405867:web:24fb4cdf0320c2c3488d2e",
+  measurementId: "G-DKBLTBFHJ5"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const words = ["OKO","DARMOZJAD","TIKTOK","MEM","NETFLIX","LODY","ROWER","ŻABKA","CARPATH","AGRECOL","PIZZA","PASTA","STARUCH","SIGMA","SNAP","DISCORD","SZKOŁA","TRAMWAJ","WAKACJE","PARK","KOT","PIES","IPHONE","KOMPUTER","FRYZURA","EMOJI","POLICJA","BAN","FLEX","KANAPKA","DŁUGOPIS","KAKTUS","DRIP","DOMÓWKA","HERBATA","MIŁOŚĆ","GRA","FILM","SPORT","PRALKA","SUSHI","TEAM","FACEBOOK","YOUTUBE","POCIĄG","DOM","BUDYNEK","BRAMKA"];
+
+let playerId = Math.random().toString(36).substring(2,9);
+let roomRef = null;
+let isHost = false;
+let playerName = "";
+
+function randomCode() { return Math.floor(1000 + Math.random() * 9000).toString(); }
+
+function showMyName() {
+  const nameDiv = document.getElementById("myName");
+  nameDiv.innerText = `Twoje imię: ${playerName}`;
+  nameDiv.classList.remove("hidden");
+}
+
+function showResult(text) {
+  document.getElementById("result").innerText = text;
+  document.getElementById("result").classList.remove("hidden");
+
+  const waitingDiv = document.getElementById("waiting");
+  if (!waitingDiv.classList.contains("hidden")) {
+    waitingDiv.querySelector("h2").innerText = "ZGADNIJ IMPOSTORA";
+  }
+}
+
+async function updatePlayerList() {
+  const snap = await roomRef.get();
+  const data = snap.val();
+  const playersList = data.players ? Object.values(data.players).map(p => p.name) : [];
+  document.getElementById("playerList").innerText = playersList.join(", ");
+  const nonHostCount = playersList.filter(n => !n.includes("(HOST)")).length;
+  document.getElementById("players").innerText = `Gracze: ${nonHostCount}/4`;
+}
+
+// Tworzenie pokoju
+window.createRoom = async function() {
+  playerName = document.getElementById("playerName").value.trim();
+  if (!playerName) return alert("Podaj imię!");
+  playerName += " (HOST)";
+  isHost = true;
+  showMyName();
+
+  const code = randomCode();
+  roomRef = db.ref("rooms/" + code);
+  await roomRef.set({ players: {}, started: false });
+
+  document.getElementById("menu").classList.add("hidden");
+  document.getElementById("hostPanel").classList.remove("hidden");
+  document.getElementById("roomCode").innerText = code;
+
+  const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
+  await playerRef.set({ name: playerName });
+
+  roomRef.on("value", async snapshot => {
+    await updatePlayerList();
+    const data = snapshot.val();
+    if (data.started && data.roles && data.word) {
+      const role = data.roles[playerId];
+      if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
+      else if (role !== "host") showResult(`🔤 Hasło: ${data.word}`);
+    }
+  });
+}
+
+// Dołączenie do pokoju
+window.joinRoom = async function() {
+  playerName = document.getElementById("playerName").value.trim();
+  if (!playerName) return alert("Podaj imię!");
+  showMyName();
+
+  const code = document.getElementById("joinCode").value.trim();
+  if (!code) return alert("Podaj kod pokoju!");
+  roomRef = db.ref("rooms/" + code);
+
+  roomRef.get().then(async snapshot => {
+    if (!snapshot.exists()) return alert("Pokój nie istnieje!");
+
+    const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
+    playerRef.set({ name: playerName });
+
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("waiting").classList.remove("hidden");
+
+    roomRef.on("value", snapshot => {
+      updatePlayerList();
+      const data = snapshot.val();
+      if (data.started && data.roles && data.word) {
+        const role = data.roles[playerId];
+        if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
+        else if (role !== "host") showResult(`🔤 Hasło: ${data.word}`);
+      }
+    });
+  });
+}
+
+// Rozpoczęcie gry (host)
+window.startGame = async function() {
+  const snap = await roomRef.get();
+  const data = snap.val();
+  const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
+  if (players.length !== 4) return alert("Musi być dokładnie 4 graczy (bez hosta)!");
+
+  const word = words[Math.floor(Math.random() * words.length)];
+  const impostor = players[Math.floor(Math.random() * players.length)];
+  const roles = {};
+  players.forEach(p => roles[p] = p === impostor ? "impostor" : "normal");
+  roles[playerId] = "host";
+
+  await roomRef.update({ started: true, roles, word });
+  document.getElementById("btnNextRound").classList.remove("hidden");
+  showResult("Runda rozpoczęta!");
+}
+
+// Rozlosowanie kolejnej rundy (host)
+window.nextRound = async function() {
+  const snap = await roomRef.get();
+  const data = snap.val();
+  const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
+
+  const word = words[Math.floor(Math.random() * words.length)];
+  const impostor = players[Math.floor(Math.random() * players.length)];
+  const roles = {};
+  players.forEach(p => roles[p] = p === impostor ? "impostor" : "normal");
+  roles[playerId] = "host";
+
+  await roomRef.update({ started: true, roles, word });
+  document.getElementById("result").classList.add("hidden");
+}
+document.getElementById("btnCreate").addEventListener("click", createRoom);
+document.getElementById("btnJoin").addEventListener("click", joinRoom);
+document.getElementById("btnStart").addEventListener("click", startGame);
+document.getElementById("btnNextRound").addEventListener("click", nextRound);
+</script>
+</body>
+</html>
