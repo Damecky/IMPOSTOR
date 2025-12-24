@@ -93,7 +93,7 @@ input {
 
 <div id="hostPanel" class="hidden">
   <h2>Kod pokoju: <span id="roomCode"></span></h2>
-  <p id="players">Gracze: 0/4</p>
+  <p id="players">Gracze: 0/7</p>
   <p id="playerList"></p>
   <button id="btnStart">Rozdaj role</button>
   <button id="btnNextRound" class="hidden">Rozlosuj kolejną rundę</button>
@@ -155,7 +155,7 @@ async function updatePlayerList() {
   const playersList = data.players ? Object.values(data.players).map(p => p.name) : [];
   document.getElementById("playerList").innerText = playersList.join(", ");
   const nonHostCount = playersList.filter(n => !n.includes("(HOST)")).length;
-  document.getElementById("players").innerText = `Gracze: ${nonHostCount}/4`;
+  document.getElementById("players").innerText = `Gracze: ${nonHostCount}/7`;
 }
 
 // Tworzenie pokoju
@@ -224,7 +224,7 @@ window.startGame = async function() {
   const snap = await roomRef.get();
   const data = snap.val();
   const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
-  if (players.length !== 4) return alert("Musi być dokładnie 4 graczy (bez hosta)!");
+  if (players.length !== 4) return alert("Musi być dokładnie 7 graczy (bez hosta)!");
 
   const word = words[Math.floor(Math.random() * words.length)];
   const impostor = players[Math.floor(Math.random() * players.length)];
@@ -259,3 +259,4 @@ document.getElementById("btnNextRound").addEventListener("click", nextRound);
 </script>
 </body>
 </html>
+
