@@ -103,7 +103,7 @@ input {
 
 <div id="hostPanel" class="hidden">
   <h2><span id="roomCodeLabel">Kod pokoju:</span> <span id="roomCode"></span></h2>
-  <p id="players">Gracze: 0/7</p>
+  <p id="players">Gracze: 0/4</p>
   <p id="playerList"></p>
   <button id="btnStart">Rozdaj role</button>
   <button id="btnNextRound" class="hidden">Rozlosuj kolejną rundę</button>
@@ -122,7 +122,7 @@ input {
 
 <script>
 /* ====== USTAWIENIE: ILOŚĆ GRACZY (bez hosta) ====== */
-const MAX_PLAYERS = 7;
+const MAX_PLAYERS = 4;
 
 /* ====== Firebase ====== */
 const firebaseConfig = {
@@ -567,3 +567,4 @@ document.getElementById("btnLangDe").addEventListener("click", () => { lang = "d
 </script>
 </body>
 </html>
+
