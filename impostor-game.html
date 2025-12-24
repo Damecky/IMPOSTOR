@@ -138,8 +138,147 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ====== SŁOWA ====== */
-const words = ["OKO","DARMOZJAD","TIKTOK","MEM","NETFLIX","LODY","ROWER","ŻABKA","CARPATH","AGRECOL","PIZZA","PASTA","STARUCH","SIGMA","SNAP","DISCORD","SZKOŁA","TRAMWAJ","WAKACJE","PARK","KOT","PIES","IPHONE","KOMPUTER","FRYZURA","EMOJI","POLICJA","BAN","FLEX","KANAPKA","DŁUGOPIS","KAKTUS","DRIP","DOMÓWKA","HERBATA","MIŁOŚĆ","GRA","FILM","SPORT","PRALKA","SUSHI","TEAM","FACEBOOK","YOUTUBE","POCIĄG","DOM","BUDYNEK","BRAMKA"];
+/* ====== 100 HASEŁ PL/DE ====== */
+const WORDS = {
+  oko:        { pl: "OKO", de: "AUGE" },
+  ucho:       { pl: "UCHO", de: "OHR" },
+  nos:        { pl: "NOS", de: "NASE" },
+  reka:       { pl: "RĘKA", de: "HAND" },
+  noga:       { pl: "NOGA", de: "BEIN" },
+
+  kot:        { pl: "KOT", de: "KATZE" },
+  pies:       { pl: "PIES", de: "HUND" },
+  ptak:       { pl: "PTAK", de: "VOGEL" },
+  ryba:       { pl: "RYBA", de: "FISCH" },
+  kon:        { pl: "KOŃ", de: "PFERD" },
+
+  dom:        { pl: "DOM", de: "HAUS" },
+  szkola:     { pl: "SZKOŁA", de: "SCHULE" },
+  praca:      { pl: "PRACA", de: "ARBEIT" },
+  miasto:     { pl: "MIASTO", de: "STADT" },
+  wies:       { pl: "WIEŚ", de: "DORF" },
+
+  auto:       { pl: "AUTO", de: "AUTO" },
+  rower:      { pl: "ROWER", de: "FAHRRAD" },
+  pociag:     { pl: "POCIĄG", de: "ZUG" },
+  autobus:    { pl: "AUTOBUS", de: "BUS" },
+  tramwaj:    { pl: "TRAMWAJ", de: "STRAßENBAHN" },
+
+  telefon:    { pl: "TELEFON", de: "HANDY" },
+  komputer:   { pl: "KOMPUTER", de: "COMPUTER" },
+  internet:   { pl: "INTERNET", de: "INTERNET" },
+  gra:        { pl: "GRA", de: "SPIEL" },
+  film:       { pl: "FILM", de: "FILM" },
+
+  pizza:      { pl: "PIZZA", de: "PIZZA" },
+  hamburger:  { pl: "HAMBURGER", de: "HAMBURGER" },
+  kanapka:    { pl: "KANAPKA", de: "SANDWICH" },
+  makaron:    { pl: "MAKARON", de: "NUDELN" },
+  zupa:       { pl: "ZUPA", de: "SUPPE" },
+
+  woda:       { pl: "WODA", de: "WASSER" },
+  kawa:       { pl: "KAWA", de: "KAFFEE" },
+  herbata:    { pl: "HERBATA", de: "TEE" },
+  sok:        { pl: "SOK", de: "SAFT" },
+  mleko:      { pl: "MLEKO", de: "MILCH" },
+
+  lato:       { pl: "LATO", de: "SOMMER" },
+  zima:       { pl: "ZIMA", de: "WINTER" },
+  wiosna:     { pl: "WIOSNA", de: "FRÜHLING" },
+  jesien:     { pl: "JESIEŃ", de: "HERBST" },
+  pogoda:     { pl: "POGODA", de: "WETTER" },
+
+  wakacje:    { pl: "WAKACJE", de: "URLAUB" },
+  weekend:    { pl: "WEEKEND", de: "WOCHENENDE" },
+  impreza:    { pl: "IMPREZA", de: "PARTY" },
+  koncert:    { pl: "KONCERT", de: "KONZERT" },
+  sport:      { pl: "SPORT", de: "SPORT" },
+
+  pilka:      { pl: "PIŁKA", de: "BALL" },
+  mecz:       { pl: "MECZ", de: "SPIEL" },
+  basen:      { pl: "BASEN", de: "SCHWIMMBAD" },
+  silownia:   { pl: "SIŁOWNIA", de: "FITNESSSTUDIO" },
+  bieganie:   { pl: "BIEGANIE", de: "LAUFEN" },
+
+  pieniadze:  { pl: "PIENIĄDZE", de: "GELD" },
+  sklep:      { pl: "SKLEP", de: "LADEN" },
+  zakupy:     { pl: "ZAKUPY", de: "EINKAUF" },
+  prezent:    { pl: "PREZENT", de: "GESCHENK" },
+  promocja:   { pl: "PROMOCJA", de: "ANGEBOT" },
+
+  czas:       { pl: "CZAS", de: "ZEIT" },
+  dzien:      { pl: "DZIEŃ", de: "TAG" },
+  noc:        { pl: "NOC", de: "NACHT" },
+  rano:       { pl: "RANO", de: "MORGEN" },
+  wieczor:    { pl: "WIECZÓR", de: "ABEND" },
+
+  milosc:     { pl: "MIŁOŚĆ", de: "LIEBE" },
+  przyjazn:   { pl: "PRZYJAŹŃ", de: "FREUNDSCHAFT" },
+  rodzina:    { pl: "RODZINA", de: "FAMILIE" },
+  dziecko:    { pl: "DZIECKO", de: "KIND" },
+  rodzice:    { pl: "RODZICE", de: "ELTERN" },
+
+  // Dodatkowe, żeby było równo 100 (50 było wcześniej; dokładamy kolejne 50)
+  nauczyciel: { pl: "NAUCZYCIEL", de: "LEHRER" },
+  uczen:      { pl: "UCZEŃ", de: "SCHÜLER" },
+  ksiazka:    { pl: "KSIĄŻKA", de: "BUCH" },
+  zeszyt:     { pl: "ZESZYT", de: "HEFT" },
+  dlugopis:   { pl: "DŁUGOPIS", de: "KUGELSCHREIBER" },
+
+  stół:       { pl: "STÓŁ", de: "TISCH" },
+  krzeslo:    { pl: "KRZESŁO", de: "STUHL" },
+  lozko:      { pl: "ŁÓŻKO", de: "BETT" },
+  okno:       { pl: "OKNO", de: "FENSTER" },
+  drzwi:      { pl: "DRZWI", de: "TÜR" },
+
+  kuchnia:    { pl: "KUCHNIA", de: "KÜCHE" },
+  lazienka:   { pl: "ŁAZIENKA", de: "BADEZIMMER" },
+  pokoj:      { pl: "POKÓJ", de: "ZIMMER" },
+  ogród:      { pl: "OGRÓD", de: "GARTEN" },
+  balkon:     { pl: "BALKON", de: "BALKON" },
+
+  policja:    { pl: "POLICJA", de: "POLIZEI" },
+  lekarz:     { pl: "LEKARZ", de: "ARZT" },
+  pielegniarka:{ pl:"PIELĘGNIARKA", de:"KRANKENSCHWESTER" },
+  strażak:    { pl: "STRAŻAK", de: "FEUERWEHRMANN" },
+  mechanik:   { pl: "MECHANIK", de: "MECHANIKER" },
+
+  park:       { pl: "PARK", de: "PARK" },
+  las:        { pl: "LAS", de: "WALD" },
+  jezioro:    { pl: "JEZIORO", de: "SEE" },
+  morze:      { pl: "MORZE", de: "MEER" },
+  góry:       { pl: "GÓRY", de: "BERGE" },
+
+  deszcz:     { pl: "DESZCZ", de: "REGEN" },
+  śnieg:      { pl: "ŚNIEG", de: "SCHNEE" },
+  wiatr:      { pl: "WIATR", de: "WIND" },
+  słońce:     { pl: "SŁOŃCE", de: "SONNE" },
+  chmury:     { pl: "CHMURY", de: "WOLKEN" },
+
+  lod:        { pl: "LÓD", de: "EIS" },
+  lody:       { pl: "LODY", de: "EISCREME" },
+  ciasto:     { pl: "CIASTO", de: "KUCHEN" },
+  czekolada:  { pl: "CZEKOLADA", de: "SCHOKOLADE" },
+  cukier:     { pl: "CUKIER", de: "ZUCKER" },
+
+  muzyka:     { pl: "MUZYKA", de: "MUSIK" },
+  gitara:     { pl: "GITARA", de: "GITARRE" },
+  pianino:    { pl: "PIANINO", de: "KLAVIER" },
+  taniec:     { pl: "TANIEC", de: "TANZ" },
+  piosenka:   { pl: "PIOSENKA", de: "LIED" },
+
+  facebook:   { pl: "FACEBOOK", de: "FACEBOOK" },
+  youtube:    { pl: "YOUTUBE", de: "YOUTUBE" },
+  discord:    { pl: "DISCORD", de: "DISCORD" },
+  mem:        { pl: "MEM", de: "MEME" },
+  netflix:    { pl: "NETFLIX", de: "NETFLIX" },
+
+  ubranie:    { pl: "UBRANIE", de: "KLEIDUNG" },
+  buty:       { pl: "BUTY", de: "SCHUHE" },
+  czapka:     { pl: "CZAPKA", de: "MÜTZE" },
+  kurtka:     { pl: "KURTKA", de: "JACKE" },
+  plecak:     { pl: "PLECAK", de: "RUCKSACK" }
+};
 
 /* ====== STAN GRY ====== */
 let playerId = Math.random().toString(36).substring(2,9);
@@ -147,7 +286,7 @@ let roomRef = null;
 let isHost = false;
 let playerName = "";
 
-/* ====== TŁUMACZENIA ====== */
+/* ====== TŁUMACZENIA UI ====== */
 let lang = "pl";
 const t = {
   pl: {
@@ -171,7 +310,8 @@ const t = {
     impostor: "🕵️‍♂️ JESTEŚ IMPOSTOREM!",
     word: "🔤 Hasło",
     roundStarted: "Runda rozpoczęta!",
-    myName: "Twoje imię"
+    myName: "Twoje imię",
+    wordMissing: "Brak tłumaczenia hasła"
   },
   de: {
     title: "🕵️‍♂️ IMPOSTOR SPIEL",
@@ -194,9 +334,15 @@ const t = {
     impostor: "🕵️‍♂️ DU BIST DER IMPOSTOR!",
     word: "🔤 Wort",
     roundStarted: "Runde gestartet!",
-    myName: "Dein Name"
+    myName: "Dein Name",
+    wordMissing: "Keine Übersetzung für das Wort"
   }
 };
+
+function getWordForLang(wordKey) {
+  if (!wordKey || !WORDS[wordKey]) return null;
+  return WORDS[wordKey][lang] || null;
+}
 
 function applyLang() {
   document.documentElement.lang = lang;
@@ -221,11 +367,33 @@ function applyLang() {
 
   // odśwież licznik graczy, jeśli jesteśmy w pokoju
   if (roomRef) updatePlayerList();
-  // odśwież "Twoje imię" jeśli już pokazane
+
+  // odśwież "Twoje imię"
   const myNameDiv = document.getElementById("myName");
   if (!myNameDiv.classList.contains("hidden")) {
     myNameDiv.innerText = `${t[lang].myName}: ${playerName}`;
   }
+
+  // ✅ kluczowe: jeśli już pokazujemy wynik i gra trwa, przelicz hasło na nowy język
+  refreshCurrentResult();
+}
+
+function refreshCurrentResult() {
+  if (!roomRef) return;
+  roomRef.get().then(snap => {
+    const data = snap.val();
+    if (!data || !data.started || !data.roles) return;
+
+    const role = data.roles[playerId];
+    if (role === "impostor") {
+      showResult(t[lang].impostor);
+      return;
+    }
+    if (role !== "host") {
+      const w = getWordForLang(data.wordKey);
+      showResult(`${t[lang].word}: ${w || t[lang].wordMissing}`);
+    }
+  });
 }
 
 applyLang();
@@ -291,10 +459,13 @@ window.createRoom = async function() {
   roomRef.on("value", async snapshot => {
     await updatePlayerList();
     const data = snapshot.val();
-    if (data && data.started && data.roles && data.word) {
+    if (data && data.started && data.roles && data.wordKey) {
       const role = data.roles[playerId];
       if (role === "impostor") showResult(t[lang].impostor);
-      else if (role !== "host") showResult(`${t[lang].word}: ${data.word}`);
+      else if (role !== "host") {
+        const w = getWordForLang(data.wordKey);
+        showResult(`${t[lang].word}: ${w || t[lang].wordMissing}`);
+      }
     }
   });
 }
@@ -315,10 +486,8 @@ window.joinRoom = async function() {
   const data = snap.val();
   const nonHostCount = await getNonHostCount(data);
 
-  // ✅ blokada na max graczy (bez hosta)
   if (nonHostCount >= MAX_PLAYERS) return alert(t[lang].full);
 
-  // dopiero teraz zapisujemy gracza
   const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
   await playerRef.set({ name: playerName });
 
@@ -331,10 +500,13 @@ window.joinRoom = async function() {
   roomRef.on("value", snapshot => {
     updatePlayerList();
     const d = snapshot.val();
-    if (d && d.started && d.roles && d.word) {
+    if (d && d.started && d.roles && d.wordKey) {
       const role = d.roles[playerId];
       if (role === "impostor") showResult(t[lang].impostor);
-      else if (role !== "host") showResult(`${t[lang].word}: ${d.word}`);
+      else if (role !== "host") {
+        const w = getWordForLang(d.wordKey);
+        showResult(`${t[lang].word}: ${w || t[lang].wordMissing}`);
+      }
     }
   });
 }
@@ -345,21 +517,20 @@ window.startGame = async function() {
   const data = snap.val();
   if (!data) return;
 
-  // gracze bez hosta
   const players = Object.keys(data.players || {})
     .filter(id => !(data.players[id].name || "").includes("(HOST)"));
 
-  // ✅ TU JEST JEDYNE MIEJSCE KONTROLI ILOŚCI — dokładnie 7
   if (players.length !== MAX_PLAYERS) return alert(t[lang].needExact);
 
-  const word = words[Math.floor(Math.random() * words.length)];
-  const impostor = players[Math.floor(Math.random() * players.length)];
+  const keys = Object.keys(WORDS);
+  const wordKey = keys[Math.floor(Math.random() * keys.length)];
 
+  const impostor = players[Math.floor(Math.random() * players.length)];
   const roles = {};
   players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
   roles[playerId] = "host";
 
-  await roomRef.update({ started: true, roles, word });
+  await roomRef.update({ started: true, roles, wordKey });
   document.getElementById("btnNextRound").classList.remove("hidden");
   showResult(t[lang].roundStarted);
 }
@@ -373,411 +544,15 @@ window.nextRound = async function() {
   const players = Object.keys(data.players || {})
     .filter(id => !(data.players[id].name || "").includes("(HOST)"));
 
-  const word = words[Math.floor(Math.random() * words.length)];
-  const impostor = players[Math.floor(Math.random() * players.length)];
+  const keys = Object.keys(WORDS);
+  const wordKey = keys[Math.floor(Math.random() * keys.length)];
 
+  const impostor = players[Math.floor(Math.random() * players.length)];
   const roles = {};
   players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
   roles[playerId] = "host";
 
-  await roomRef.update({ started: true, roles, word });
-  document.getElementById("result").classList.add("hidden");
-}
-
-/* ====== Eventy ====== */
-document.getElementById("btnCreate").addEventListener("click", createRoom);
-document.getElementById("btnJoin").addEventListener("click", joinRoom);
-document.getElementById("btnStart").addEventListener("click", startGame);
-document.getElementById("btnNextRound").addEventListener("click", nextRound);
-
-document.getElementById("btnLangPl").addEventListener("click", () => { lang = "pl"; applyLang(); });
-document.getElementById("btnLangDe").addEventListener("click", () => { lang = "de"; applyLang(); });
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title id="pageTitle">🕵️‍♂️ IMPOSTOR GAME</title>
-<style>
-body { 
-  font-family: 'Segoe UI', sans-serif; 
-  background: #0d1117; 
-  color: #fff; 
-  text-align: center; 
-  margin: 0; 
-  padding: 0; 
-}
-h1 { 
-  color: #00d26a; 
-  margin-top: 40px; 
-  font-size: 42px; 
-}
-button { 
-  background: #00d26a; 
-  color: black; 
-  border: none; 
-  border-radius: 12px; 
-  padding: 20px 40px; 
-  font-size: 20px; 
-  margin: 15px 0; 
-  cursor: pointer; 
-  width: 80%; 
-  max-width: 300px; 
-}
-button:hover { 
-  background: #00b85d; 
-}
-input { 
-  font-size: 20px; 
-  padding: 15px; 
-  border-radius: 10px; 
-  border: 1px solid #ccc; 
-  width: 80%; 
-  max-width: 300px; 
-  text-align: center; 
-  margin-bottom: 15px; 
-}
-#myName {
-  margin-top: 20px;
-  padding: 20px;
-  background: #1c222b;
-  border-radius: 15px;
-  box-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
-  font-size: 20px;
-  display: inline-block;
-}
-.card { 
-  margin-top: 30px; 
-  padding: 25px 30px; 
-  background: #161b22; 
-  border-radius: 20px; 
-  display: inline-block; 
-  font-size: 26px; 
-  font-weight: bold; 
-  color: #00d26a;
-  text-shadow: 0 0 8px rgba(0, 210, 106, 0.7);
-  max-width: 90%; 
-  word-wrap: break-word; 
-  transition: all 0.3s ease;
-}
-.hidden { display: none; }
-.smallBtnRow{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin-bottom: 20px;
-}
-.smallBtnRow button{
-  width:auto;
-  padding: 10px 18px;
-  font-size: 16px;
-  margin: 0;
-  max-width:none;
-}
-</style>
-</head>
-<body>
-
-<h1 id="title">🕵️‍♂️ IMPOSTOR GAME</h1>
-
-<!-- WYBÓR JĘZYKA -->
-<div class="smallBtnRow">
-  <button id="btnLangPl">🇵🇱 Polski</button>
-  <button id="btnLangDe">🇩🇪 Deutsch</button>
-</div>
-
-<div id="menu">
-  <input id="playerName" placeholder="Twoje imię" />
-  <button id="btnCreate">Stwórz grę</button>
-  <p id="orText" style="margin:10px 0;">lub</p>
-  <input id="joinCode" placeholder="Kod pokoju" />
-  <button id="btnJoin">Dołącz</button>
-</div>
-
-<div id="hostPanel" class="hidden">
-  <h2><span id="roomCodeLabel">Kod pokoju:</span> <span id="roomCode"></span></h2>
-  <p id="players">Gracze: 0/7</p>
-  <p id="playerList"></p>
-  <button id="btnStart">Rozdaj role</button>
-  <button id="btnNextRound" class="hidden">Rozlosuj kolejną rundę</button>
-</div>
-
-<div id="waiting" class="hidden">
-  <h2 id="waitingText">Oczekiwanie na rozpoczęcie...</h2>
-</div>
-
-<div id="myName" class="hidden card"></div>
-<div id="result" class="hidden card"></div>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<script>
-/* ====== USTAWIENIE: ILOŚĆ GRACZY (bez hosta) ====== */
-const MAX_PLAYERS = 7;
-
-/* ====== Firebase ====== */
-const firebaseConfig = {
-  apiKey: "AIzaSyAy1mE_Q3fJo9W2Aa9EQUqp0L0Bn53XPHc",
-  authDomain: "impostor-game-ebc12.firebaseapp.com",
-  databaseURL: "https://impostor-game-ebc12-default-rtdb.europe-west1.firebasedatabase.app/",
-  projectId: "impostor-game-ebc12",
-  storageBucket: "impostor-game-ebc12.appspot.com",
-  messagingSenderId: "561452405867",
-  appId: "1:561452405867:web:24fb4cdf0320c2c3488d2e",
-  measurementId: "G-DKBLTBFHJ5"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-/* ====== SŁOWA ====== */
-const words = ["OKO","DARMOZJAD","TIKTOK","MEM","NETFLIX","LODY","ROWER","ŻABKA","CARPATH","AGRECOL","PIZZA","PASTA","STARUCH","SIGMA","SNAP","DISCORD","SZKOŁA","TRAMWAJ","WAKACJE","PARK","KOT","PIES","IPHONE","KOMPUTER","FRYZURA","EMOJI","POLICJA","BAN","FLEX","KANAPKA","DŁUGOPIS","KAKTUS","DRIP","DOMÓWKA","HERBATA","MIŁOŚĆ","GRA","FILM","SPORT","PRALKA","SUSHI","TEAM","FACEBOOK","YOUTUBE","POCIĄG","DOM","BUDYNEK","BRAMKA"];
-
-/* ====== STAN GRY ====== */
-let playerId = Math.random().toString(36).substring(2,9);
-let roomRef = null;
-let isHost = false;
-let playerName = "";
-
-/* ====== TŁUMACZENIA ====== */
-let lang = "pl";
-const t = {
-  pl: {
-    title: "🕵️‍♂️ IMPOSTOR GAME",
-    yourNamePh: "Twoje imię",
-    create: "Stwórz grę",
-    or: "lub",
-    joinCodePh: "Kod pokoju",
-    join: "Dołącz",
-    roomCode: "Kod pokoju:",
-    players: "Gracze",
-    dealRoles: "Rozdaj role",
-    nextRound: "Rozlosuj kolejną rundę",
-    waiting: "Oczekiwanie na rozpoczęcie...",
-    guess: "ZGADNIJ IMPOSTORA",
-    enterName: "Podaj imię!",
-    enterRoom: "Podaj kod pokoju!",
-    noRoom: "Pokój nie istnieje!",
-    full: "Pokój jest pełny!",
-    needExact: `Musi być dokładnie ${MAX_PLAYERS} graczy (bez hosta)!`,
-    impostor: "🕵️‍♂️ JESTEŚ IMPOSTOREM!",
-    word: "🔤 Hasło",
-    roundStarted: "Runda rozpoczęta!",
-    myName: "Twoje imię"
-  },
-  de: {
-    title: "🕵️‍♂️ IMPOSTOR SPIEL",
-    yourNamePh: "Dein Name",
-    create: "Spiel erstellen",
-    or: "oder",
-    joinCodePh: "Raumcode",
-    join: "Beitreten",
-    roomCode: "Raumcode:",
-    players: "Spieler",
-    dealRoles: "Rollen verteilen",
-    nextRound: "Nächste Runde auslosen",
-    waiting: "Warten auf den Start...",
-    guess: "FINDE DEN IMPOSTOR",
-    enterName: "Gib einen Namen ein!",
-    enterRoom: "Gib den Raumcode ein!",
-    noRoom: "Raum existiert nicht!",
-    full: "Der Raum ist voll!",
-    needExact: `Es müssen genau ${MAX_PLAYERS} Spieler sein (ohne Host)!`,
-    impostor: "🕵️‍♂️ DU BIST DER IMPOSTOR!",
-    word: "🔤 Wort",
-    roundStarted: "Runde gestartet!",
-    myName: "Dein Name"
-  }
-};
-
-function applyLang() {
-  document.documentElement.lang = lang;
-  document.getElementById("title").innerText = t[lang].title;
-  document.title = t[lang].title;
-
-  document.getElementById("playerName").placeholder = t[lang].yourNamePh;
-  document.getElementById("btnCreate").innerText = t[lang].create;
-  document.getElementById("orText").innerText = t[lang].or;
-  document.getElementById("joinCode").placeholder = t[lang].joinCodePh;
-  document.getElementById("btnJoin").innerText = t[lang].join;
-
-  document.getElementById("roomCodeLabel").innerText = t[lang].roomCode;
-  document.getElementById("btnStart").innerText = t[lang].dealRoles;
-  document.getElementById("btnNextRound").innerText = t[lang].nextRound;
-
-  // jeśli ktoś czeka
-  const waiting = document.getElementById("waiting");
-  if (!waiting.classList.contains("hidden")) {
-    document.getElementById("waitingText").innerText = t[lang].waiting;
-  }
-
-  // odśwież licznik graczy, jeśli jesteśmy w pokoju
-  if (roomRef) updatePlayerList();
-  // odśwież "Twoje imię" jeśli już pokazane
-  const myNameDiv = document.getElementById("myName");
-  if (!myNameDiv.classList.contains("hidden")) {
-    myNameDiv.innerText = `${t[lang].myName}: ${playerName}`;
-  }
-}
-
-applyLang();
-
-/* ====== HELPERS ====== */
-function randomCode() { return Math.floor(1000 + Math.random() * 9000).toString(); }
-
-function showMyName() {
-  const nameDiv = document.getElementById("myName");
-  nameDiv.innerText = `${t[lang].myName}: ${playerName}`;
-  nameDiv.classList.remove("hidden");
-}
-
-function showResult(text) {
-  document.getElementById("result").innerText = text;
-  document.getElementById("result").classList.remove("hidden");
-
-  const waitingDiv = document.getElementById("waiting");
-  if (!waitingDiv.classList.contains("hidden")) {
-    waitingDiv.querySelector("h2").innerText = t[lang].guess;
-  }
-}
-
-async function getNonHostCount(roomData) {
-  const playersObj = roomData.players || {};
-  const names = Object.values(playersObj).map(p => p.name || "");
-  return names.filter(n => !n.includes("(HOST)")).length;
-}
-
-async function updatePlayerList() {
-  if (!roomRef) return;
-  const snap = await roomRef.get();
-  const data = snap.val();
-  if (!data) return;
-
-  const playersList = data.players ? Object.values(data.players).map(p => p.name) : [];
-  document.getElementById("playerList").innerText = playersList.join(", ");
-
-  const nonHostCount = playersList.filter(n => !n.includes("(HOST)")).length;
-  document.getElementById("players").innerText = `${t[lang].players}: ${nonHostCount}/${MAX_PLAYERS}`;
-}
-
-/* ====== Tworzenie pokoju ====== */
-window.createRoom = async function() {
-  playerName = document.getElementById("playerName").value.trim();
-  if (!playerName) return alert(t[lang].enterName);
-
-  playerName += " (HOST)";
-  isHost = true;
-  showMyName();
-
-  const code = randomCode();
-  roomRef = db.ref("rooms/" + code);
-  await roomRef.set({ players: {}, started: false });
-
-  document.getElementById("menu").classList.add("hidden");
-  document.getElementById("hostPanel").classList.remove("hidden");
-  document.getElementById("roomCode").innerText = code;
-
-  const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
-  await playerRef.set({ name: playerName });
-
-  roomRef.on("value", async snapshot => {
-    await updatePlayerList();
-    const data = snapshot.val();
-    if (data && data.started && data.roles && data.word) {
-      const role = data.roles[playerId];
-      if (role === "impostor") showResult(t[lang].impostor);
-      else if (role !== "host") showResult(`${t[lang].word}: ${data.word}`);
-    }
-  });
-}
-
-/* ====== Dołączenie do pokoju ====== */
-window.joinRoom = async function() {
-  playerName = document.getElementById("playerName").value.trim();
-  if (!playerName) return alert(t[lang].enterName);
-
-  const code = document.getElementById("joinCode").value.trim();
-  if (!code) return alert(t[lang].enterRoom);
-
-  roomRef = db.ref("rooms/" + code);
-
-  const snap = await roomRef.get();
-  if (!snap.exists()) return alert(t[lang].noRoom);
-
-  const data = snap.val();
-  const nonHostCount = await getNonHostCount(data);
-
-  // ✅ blokada na max graczy (bez hosta)
-  if (nonHostCount >= MAX_PLAYERS) return alert(t[lang].full);
-
-  // dopiero teraz zapisujemy gracza
-  const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
-  await playerRef.set({ name: playerName });
-
-  showMyName();
-
-  document.getElementById("menu").classList.add("hidden");
-  document.getElementById("waiting").classList.remove("hidden");
-  document.getElementById("waitingText").innerText = t[lang].waiting;
-
-  roomRef.on("value", snapshot => {
-    updatePlayerList();
-    const d = snapshot.val();
-    if (d && d.started && d.roles && d.word) {
-      const role = d.roles[playerId];
-      if (role === "impostor") showResult(t[lang].impostor);
-      else if (role !== "host") showResult(`${t[lang].word}: ${d.word}`);
-    }
-  });
-}
-
-/* ====== Start gry (host) ====== */
-window.startGame = async function() {
-  const snap = await roomRef.get();
-  const data = snap.val();
-  if (!data) return;
-
-  // gracze bez hosta
-  const players = Object.keys(data.players || {})
-    .filter(id => !(data.players[id].name || "").includes("(HOST)"));
-
-  // ✅ TU JEST JEDYNE MIEJSCE KONTROLI ILOŚCI — dokładnie 7
-  if (players.length !== MAX_PLAYERS) return alert(t[lang].needExact);
-
-  const word = words[Math.floor(Math.random() * words.length)];
-  const impostor = players[Math.floor(Math.random() * players.length)];
-
-  const roles = {};
-  players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
-  roles[playerId] = "host";
-
-  await roomRef.update({ started: true, roles, word });
-  document.getElementById("btnNextRound").classList.remove("hidden");
-  showResult(t[lang].roundStarted);
-}
-
-/* ====== Kolejna runda (host) ====== */
-window.nextRound = async function() {
-  const snap = await roomRef.get();
-  const data = snap.val();
-  if (!data) return;
-
-  const players = Object.keys(data.players || {})
-    .filter(id => !(data.players[id].name || "").includes("(HOST)"));
-
-  const word = words[Math.floor(Math.random() * words.length)];
-  const impostor = players[Math.floor(Math.random() * players.length)];
-
-  const roles = {};
-  players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
-  roles[playerId] = "host";
-
-  await roomRef.update({ started: true, roles, word });
+  await roomRef.update({ started: true, roles, wordKey });
   document.getElementById("result").classList.add("hidden");
 }
 
