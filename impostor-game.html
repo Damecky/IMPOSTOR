@@ -81,18 +81,25 @@ input {
 </style>
 </head>
 <body>
-<h1>🕵️‍♂️ IMPOSTOR GAME</h1>
+
+<h1 id="title">🕵️‍♂️ IMPOSTOR GAME</h1>
+
+<!-- WYBÓR JĘZYKA -->
+<div style="margin-bottom:20px;">
+  <button id="btnLangPl">🇵🇱 Polski</button>
+  <button id="btnLangDe">🇩🇪 Deutsch</button>
+</div>
 
 <div id="menu">
   <input id="playerName" placeholder="Twoje imię" />
   <button id="btnCreate">Stwórz grę</button>
-  <p style="margin:10px 0;">lub</p>
+  <p id="orText" style="margin:10px 0;">lub</p>
   <input id="joinCode" placeholder="Kod pokoju" />
   <button id="btnJoin">Dołącz</button>
 </div>
 
 <div id="hostPanel" class="hidden">
-  <h2>Kod pokoju: <span id="roomCode"></span></h2>
+  <h2><span id="roomCodeLabel">Kod pokoju:</span> <span id="roomCode"></span></h2>
   <p id="players">Gracze: 0/7</p>
   <p id="playerList"></p>
   <button id="btnStart">Rozdaj role</button>
@@ -100,7 +107,7 @@ input {
 </div>
 
 <div id="waiting" class="hidden">
-  <h2>Oczekiwanie na rozpoczęcie...</h2>
+  <h2 id="waitingText">Oczekiwanie na rozpoczęcie...</h2>
 </div>
 
 <div id="myName" class="hidden card"></div>
@@ -131,6 +138,68 @@ let roomRef = null;
 let isHost = false;
 let playerName = "";
 
+/* ========= TŁUMACZENIA PL/DE ========= */
+let lang = "pl";
+const t = {
+  pl: {
+    title: "🕵️‍♂️ IMPOSTOR GAME",
+    yourName: "Twoje imię",
+    create: "Stwórz grę",
+    or: "lub",
+    joinCode: "Kod pokoju",
+    join: "Dołącz",
+    roomCode: "Kod pokoju:",
+    players: "Gracze",
+    dealRoles: "Rozdaj role",
+    nextRound: "Rozlosuj kolejną rundę",
+    waiting: "Oczekiwanie na rozpoczęcie...",
+    guess: "ZGADNIJ IMPOSTORA",
+    enterName: "Podaj imię!",
+    enterRoom: "Podaj kod pokoju!",
+    noRoom: "Pokój nie istnieje!",
+    need7: "Musi być dokładnie 7 graczy (bez hosta)!",
+    impostor: "🕵️‍♂️ JESTEŚ IMPOSTOREM!",
+    word: "🔤 Hasło",
+    roundStarted: "Runda rozpoczęta!"
+  },
+  de: {
+    title: "🕵️‍♂️ IMPOSTOR SPIEL",
+    yourName: "Dein Name",
+    create: "Spiel erstellen",
+    or: "oder",
+    joinCode: "Raumcode",
+    join: "Beitreten",
+    roomCode: "Raumcode:",
+    players: "Spieler",
+    dealRoles: "Rollen verteilen",
+    nextRound: "Nächste Runde auslosen",
+    waiting: "Warten auf den Start...",
+    guess: "FINDE DEN IMPOSTOR",
+    enterName: "Gib einen Namen ein!",
+    enterRoom: "Gib den Raumcode ein!",
+    noRoom: "Raum existiert nicht!",
+    need7: "Es müssen genau 7 Spieler sein (ohne Host)!",
+    impostor: "🕵️‍♂️ DU BIST DER IMPOSTOR!",
+    word: "🔤 Wort",
+    roundStarted: "Runde gestartet!"
+  }
+};
+
+function applyLang() {
+  document.getElementById("title").innerText = t[lang].title;
+  document.getElementById("playerName").placeholder = t[lang].yourName;
+  document.getElementById("btnCreate").innerText = t[lang].create;
+  document.getElementById("orText").innerText = t[lang].or;
+  document.getElementById("joinCode").placeholder = t[lang].joinCode;
+  document.getElementById("btnJoin").innerText = t[lang].join;
+  document.getElementById("roomCodeLabel").innerText = t[lang].roomCode;
+  document.getElementById("btnStart").innerText = t[lang].dealRoles;
+  document.getElementById("btnNextRound").innerText = t[lang].nextRound;
+  document.getElementById("waitingText").innerText = t[lang].waiting;
+}
+applyLang();
+/* ==================================== */
+
 function randomCode() { return Math.floor(1000 + Math.random() * 9000).toString(); }
 
 function showMyName() {
@@ -145,7 +214,7 @@ function showResult(text) {
 
   const waitingDiv = document.getElementById("waiting");
   if (!waitingDiv.classList.contains("hidden")) {
-    waitingDiv.querySelector("h2").innerText = "ZGADNIJ IMPOSTORA";
+    waitingDiv.querySelector("h2").innerText = t[lang].guess;
   }
 }
 
@@ -155,13 +224,13 @@ async function updatePlayerList() {
   const playersList = data.players ? Object.values(data.players).map(p => p.name) : [];
   document.getElementById("playerList").innerText = playersList.join(", ");
   const nonHostCount = playersList.filter(n => !n.includes("(HOST)")).length;
-  document.getElementById("players").innerText = `Gracze: ${nonHostCount}/7`;
+  document.getElementById("players").innerText = `${t[lang].players}: ${nonHostCount}/7`;
 }
 
 // Tworzenie pokoju
 window.createRoom = async function() {
   playerName = document.getElementById("playerName").value.trim();
-  if (!playerName) return alert("Podaj imię!");
+  if (!playerName) return alert(t[lang].enterName);
   playerName += " (HOST)";
   isHost = true;
   showMyName();
@@ -182,8 +251,8 @@ window.createRoom = async function() {
     const data = snapshot.val();
     if (data.started && data.roles && data.word) {
       const role = data.roles[playerId];
-      if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
-      else if (role !== "host") showResult(`🔤 Hasło: ${data.word}`);
+      if (role === "impostor") showResult(t[lang].impostor);
+      else if (role !== "host") showResult(`${t[lang].word}: ${data.word}`);
     }
   });
 }
@@ -191,15 +260,15 @@ window.createRoom = async function() {
 // Dołączenie do pokoju
 window.joinRoom = async function() {
   playerName = document.getElementById("playerName").value.trim();
-  if (!playerName) return alert("Podaj imię!");
+  if (!playerName) return alert(t[lang].enterName);
   showMyName();
 
   const code = document.getElementById("joinCode").value.trim();
-  if (!code) return alert("Podaj kod pokoju!");
+  if (!code) return alert(t[lang].enterRoom);
   roomRef = db.ref("rooms/" + code);
 
   roomRef.get().then(async snapshot => {
-    if (!snapshot.exists()) return alert("Pokój nie istnieje!");
+    if (!snapshot.exists()) return alert(t[lang].noRoom);
 
     const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
     playerRef.set({ name: playerName });
@@ -212,8 +281,8 @@ window.joinRoom = async function() {
       const data = snapshot.val();
       if (data.started && data.roles && data.word) {
         const role = data.roles[playerId];
-        if (role === "impostor") showResult("🕵️‍♂️ JESTEŚ IMPOSTOREM!");
-        else if (role !== "host") showResult(`🔤 Hasło: ${data.word}`);
+        if (role === "impostor") showResult(t[lang].impostor);
+        else if (role !== "host") showResult(`${t[lang].word}: ${data.word}`);
       }
     });
   });
@@ -224,7 +293,9 @@ window.startGame = async function() {
   const snap = await roomRef.get();
   const data = snap.val();
   const players = Object.keys(data.players || {}).filter(id => !data.players[id].name.includes("(HOST)"));
-  if (players.length !== 7) return alert("Musi być dokładnie 7 graczy (bez hosta)!");
+
+  // ✅ POPRAWKA: musi być 7 (bez hosta)
+  if (players.length !== 7) return alert(t[lang].need7);
 
   const word = words[Math.floor(Math.random() * words.length)];
   const impostor = players[Math.floor(Math.random() * players.length)];
@@ -234,7 +305,7 @@ window.startGame = async function() {
 
   await roomRef.update({ started: true, roles, word });
   document.getElementById("btnNextRound").classList.remove("hidden");
-  showResult("Runda rozpoczęta!");
+  showResult(t[lang].roundStarted);
 }
 
 // Rozlosowanie kolejnej rundy (host)
@@ -252,12 +323,16 @@ window.nextRound = async function() {
   await roomRef.update({ started: true, roles, word });
   document.getElementById("result").classList.add("hidden");
 }
+
+/* Przyciski */
 document.getElementById("btnCreate").addEventListener("click", createRoom);
 document.getElementById("btnJoin").addEventListener("click", joinRoom);
 document.getElementById("btnStart").addEventListener("click", startGame);
 document.getElementById("btnNextRound").addEventListener("click", nextRound);
+
+/* Zmiana języka */
+document.getElementById("btnLangPl").addEventListener("click", () => { lang = "pl"; applyLang(); updatePlayerList(); });
+document.getElementById("btnLangDe").addEventListener("click", () => { lang = "de"; applyLang(); updatePlayerList(); });
 </script>
 </body>
 </html>
-
-
