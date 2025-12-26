@@ -5,43 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title id="pageTitle">🕵️‍♂️ IMPOSTOR GAME</title>
 <style>
-body { 
-  font-family: 'Segoe UI', sans-serif; 
-  background: #0d1117; 
-  color: #fff; 
-  text-align: center; 
-  margin: 0; 
-  padding: 0; 
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0d1117;
+  color: #fff;
+  text-align: center;
+  margin: 0;
+  padding: 0;
 }
-h1 { 
-  color: #00d26a; 
-  margin-top: 40px; 
-  font-size: 42px; 
+h1 {
+  color: #00d26a;
+  margin-top: 40px;
+  font-size: 42px;
 }
-button { 
-  background: #00d26a; 
-  color: black; 
-  border: none; 
-  border-radius: 12px; 
-  padding: 20px 40px; 
-  font-size: 20px; 
-  margin: 15px 0; 
-  cursor: pointer; 
-  width: 80%; 
-  max-width: 300px; 
+button {
+  background: #00d26a;
+  color: black;
+  border: none;
+  border-radius: 12px;
+  padding: 20px 40px;
+  font-size: 20px;
+  margin: 15px 0;
+  cursor: pointer;
+  width: 80%;
+  max-width: 300px;
 }
-button:hover { 
-  background: #00b85d; 
-}
-input { 
-  font-size: 20px; 
-  padding: 15px; 
-  border-radius: 10px; 
-  border: 1px solid #ccc; 
-  width: 80%; 
-  max-width: 300px; 
-  text-align: center; 
-  margin-bottom: 15px; 
+button:hover { background: #00b85d; }
+input {
+  font-size: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  width: 80%;
+  max-width: 300px;
+  text-align: center;
+  margin-bottom: 15px;
 }
 #myName {
   margin-top: 20px;
@@ -52,19 +50,20 @@ input {
   font-size: 20px;
   display: inline-block;
 }
-.card { 
-  margin-top: 30px; 
-  padding: 25px 30px; 
-  background: #161b22; 
-  border-radius: 20px; 
-  display: inline-block; 
-  font-size: 26px; 
-  font-weight: bold; 
+.card {
+  margin-top: 30px;
+  padding: 25px 30px;
+  background: #161b22;
+  border-radius: 20px;
+  display: inline-block;
+  font-size: 26px;
+  font-weight: bold;
   color: #00d26a;
   text-shadow: 0 0 8px rgba(0, 210, 106, 0.7);
-  max-width: 90%; 
-  word-wrap: break-word; 
+  max-width: 90%;
+  word-wrap: break-word;
   transition: all 0.3s ease;
+  white-space: pre-line; /* żeby \n działało czytelnie */
 }
 .hidden { display: none; }
 .smallBtnRow{
@@ -103,7 +102,7 @@ input {
 
 <div id="hostPanel" class="hidden">
   <h2><span id="roomCodeLabel">Kod pokoju:</span> <span id="roomCode"></span></h2>
-  <p id="players">Gracze: 0/10</p>
+  <p id="players">Gracze: 0/4</p>
   <p id="playerList"></p>
   <button id="btnStart">Rozdaj role</button>
   <button id="btnNextRound" class="hidden">Rozlosuj kolejną rundę</button>
@@ -122,7 +121,7 @@ input {
 
 <script>
 /* ====== USTAWIENIE: ILOŚĆ GRACZY (bez hosta) ====== */
-const MAX_PLAYERS = 3-10;
+const MAX_PLAYERS = 4;
 
 /* ====== Firebase ====== */
 const firebaseConfig = {
@@ -138,146 +137,192 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ====== 100 HASEŁ PL/DE ====== */
+/* ====== KATEGORIE PL/DE ====== */
+const CATEGORIES = {
+  body:      { pl: "Ciało", de: "Körper" },
+  animals:   { pl: "Zwierzęta", de: "Tiere" },
+  places:    { pl: "Miejsca", de: "Orte" },
+  transport: { pl: "Transport", de: "Transport" },
+  tech:      { pl: "Technologia", de: "Technik" },
+  food:      { pl: "Jedzenie", de: "Essen" },
+  drinks:    { pl: "Napoje", de: "Getränke" },
+  seasons:   { pl: "Pory roku", de: "Jahreszeiten" },
+  weather:   { pl: "Pogoda", de: "Wetter" },
+  events:    { pl: "Wydarzenia", de: "Events" },
+  sport:     { pl: "Sport", de: "Sport" },
+  shopping:  { pl: "Zakupy", de: "Einkaufen" },
+  time:      { pl: "Czas", de: "Zeit" },
+  relations: { pl: "Relacje", de: "Beziehungen" },
+  school:    { pl: "Szkoła", de: "Schule" },
+  home:      { pl: "Dom", de: "Zuhause" },
+  jobs:      { pl: "Zawody", de: "Berufe" },
+  nature:    { pl: "Natura", de: "Natur" },
+  sweets:    { pl: "Słodycze", de: "Süßes" },
+  music:     { pl: "Muzyka", de: "Musik" },
+  social:    { pl: "Internet", de: "Internet" },
+  clothes:   { pl: "Ubrania", de: "Kleidung" }
+};
+
+/* ====== HASŁA POD KATEGORIAMI PL/DE ====== */
+/* (w razie potrzeby możesz dopisać kolejne słowa w odpowiednich kategoriach) */
 const WORDS = {
-  oko:        { pl: "OKO", de: "AUGE" },
-  ucho:       { pl: "UCHO", de: "OHR" },
-  nos:        { pl: "NOS", de: "NASE" },
-  reka:       { pl: "RĘKA", de: "HAND" },
-  noga:       { pl: "NOGA", de: "BEIN" },
-
-  kot:        { pl: "KOT", de: "KATZE" },
-  pies:       { pl: "PIES", de: "HUND" },
-  ptak:       { pl: "PTAK", de: "VOGEL" },
-  ryba:       { pl: "RYBA", de: "FISCH" },
-  kon:        { pl: "KOŃ", de: "PFERD" },
-
-  dom:        { pl: "DOM", de: "HAUS" },
-  szkola:     { pl: "SZKOŁA", de: "SCHULE" },
-  praca:      { pl: "PRACA", de: "ARBEIT" },
-  miasto:     { pl: "MIASTO", de: "STADT" },
-  wies:       { pl: "WIEŚ", de: "DORF" },
-
-  auto:       { pl: "AUTO", de: "AUTO" },
-  rower:      { pl: "ROWER", de: "FAHRRAD" },
-  pociag:     { pl: "POCIĄG", de: "ZUG" },
-  autobus:    { pl: "AUTOBUS", de: "BUS" },
-  tramwaj:    { pl: "TRAMWAJ", de: "STRAßENBAHN" },
-
-  telefon:    { pl: "TELEFON", de: "HANDY" },
-  komputer:   { pl: "KOMPUTER", de: "COMPUTER" },
-  internet:   { pl: "INTERNET", de: "INTERNET" },
-  gra:        { pl: "GRA", de: "SPIEL" },
-  film:       { pl: "FILM", de: "FILM" },
-
-  pizza:      { pl: "PIZZA", de: "PIZZA" },
-  hamburger:  { pl: "HAMBURGER", de: "HAMBURGER" },
-  kanapka:    { pl: "KANAPKA", de: "SANDWICH" },
-  makaron:    { pl: "MAKARON", de: "NUDELN" },
-  zupa:       { pl: "ZUPA", de: "SUPPE" },
-
-  woda:       { pl: "WODA", de: "WASSER" },
-  kawa:       { pl: "KAWA", de: "KAFFEE" },
-  herbata:    { pl: "HERBATA", de: "TEE" },
-  sok:        { pl: "SOK", de: "SAFT" },
-  mleko:      { pl: "MLEKO", de: "MILCH" },
-
-  lato:       { pl: "LATO", de: "SOMMER" },
-  zima:       { pl: "ZIMA", de: "WINTER" },
-  wiosna:     { pl: "WIOSNA", de: "FRÜHLING" },
-  jesien:     { pl: "JESIEŃ", de: "HERBST" },
-  pogoda:     { pl: "POGODA", de: "WETTER" },
-
-  wakacje:    { pl: "WAKACJE", de: "URLAUB" },
-  weekend:    { pl: "WEEKEND", de: "WOCHENENDE" },
-  impreza:    { pl: "IMPREZA", de: "PARTY" },
-  koncert:    { pl: "KONCERT", de: "KONZERT" },
-  sport:      { pl: "SPORT", de: "SPORT" },
-
-  pilka:      { pl: "PIŁKA", de: "BALL" },
-  mecz:       { pl: "MECZ", de: "SPIEL" },
-  basen:      { pl: "BASEN", de: "SCHWIMMBAD" },
-  silownia:   { pl: "SIŁOWNIA", de: "FITNESSSTUDIO" },
-  bieganie:   { pl: "BIEGANIE", de: "LAUFEN" },
-
-  pieniadze:  { pl: "PIENIĄDZE", de: "GELD" },
-  sklep:      { pl: "SKLEP", de: "LADEN" },
-  zakupy:     { pl: "ZAKUPY", de: "EINKAUF" },
-  prezent:    { pl: "PREZENT", de: "GESCHENK" },
-  promocja:   { pl: "PROMOCJA", de: "ANGEBOT" },
-
-  czas:       { pl: "CZAS", de: "ZEIT" },
-  dzien:      { pl: "DZIEŃ", de: "TAG" },
-  noc:        { pl: "NOC", de: "NACHT" },
-  rano:       { pl: "RANO", de: "MORGEN" },
-  wieczor:    { pl: "WIECZÓR", de: "ABEND" },
-
-  milosc:     { pl: "MIŁOŚĆ", de: "LIEBE" },
-  przyjazn:   { pl: "PRZYJAŹŃ", de: "FREUNDSCHAFT" },
-  rodzina:    { pl: "RODZINA", de: "FAMILIE" },
-  dziecko:    { pl: "DZIECKO", de: "KIND" },
-  rodzice:    { pl: "RODZICE", de: "ELTERN" },
-
-  // Dodatkowe, żeby było równo 100 (50 było wcześniej; dokładamy kolejne 50)
-  nauczyciel: { pl: "NAUCZYCIEL", de: "LEHRER" },
-  uczen:      { pl: "UCZEŃ", de: "SCHÜLER" },
-  ksiazka:    { pl: "KSIĄŻKA", de: "BUCH" },
-  zeszyt:     { pl: "ZESZYT", de: "HEFT" },
-  dlugopis:   { pl: "DŁUGOPIS", de: "KUGELSCHREIBER" },
-
-  stół:       { pl: "STÓŁ", de: "TISCH" },
-  krzeslo:    { pl: "KRZESŁO", de: "STUHL" },
-  lozko:      { pl: "ŁÓŻKO", de: "BETT" },
-  okno:       { pl: "OKNO", de: "FENSTER" },
-  drzwi:      { pl: "DRZWI", de: "TÜR" },
-
-  kuchnia:    { pl: "KUCHNIA", de: "KÜCHE" },
-  lazienka:   { pl: "ŁAZIENKA", de: "BADEZIMMER" },
-  pokoj:      { pl: "POKÓJ", de: "ZIMMER" },
-  ogród:      { pl: "OGRÓD", de: "GARTEN" },
-  balkon:     { pl: "BALKON", de: "BALKON" },
-
-  policja:    { pl: "POLICJA", de: "POLIZEI" },
-  lekarz:     { pl: "LEKARZ", de: "ARZT" },
-  pielegniarka:{ pl:"PIELĘGNIARKA", de:"KRANKENSCHWESTER" },
-  strażak:    { pl: "STRAŻAK", de: "FEUERWEHRMANN" },
-  mechanik:   { pl: "MECHANIK", de: "MECHANIKER" },
-
-  park:       { pl: "PARK", de: "PARK" },
-  las:        { pl: "LAS", de: "WALD" },
-  jezioro:    { pl: "JEZIORO", de: "SEE" },
-  morze:      { pl: "MORZE", de: "MEER" },
-  góry:       { pl: "GÓRY", de: "BERGE" },
-
-  deszcz:     { pl: "DESZCZ", de: "REGEN" },
-  śnieg:      { pl: "ŚNIEG", de: "SCHNEE" },
-  wiatr:      { pl: "WIATR", de: "WIND" },
-  słońce:     { pl: "SŁOŃCE", de: "SONNE" },
-  chmury:     { pl: "CHMURY", de: "WOLKEN" },
-
-  lod:        { pl: "LÓD", de: "EIS" },
-  lody:       { pl: "LODY", de: "EISCREME" },
-  ciasto:     { pl: "CIASTO", de: "KUCHEN" },
-  czekolada:  { pl: "CZEKOLADA", de: "SCHOKOLADE" },
-  cukier:     { pl: "CUKIER", de: "ZUCKER" },
-
-  muzyka:     { pl: "MUZYKA", de: "MUSIK" },
-  gitara:     { pl: "GITARA", de: "GITARRE" },
-  pianino:    { pl: "PIANINO", de: "KLAVIER" },
-  taniec:     { pl: "TANIEC", de: "TANZ" },
-  piosenka:   { pl: "PIOSENKA", de: "LIED" },
-
-  facebook:   { pl: "FACEBOOK", de: "FACEBOOK" },
-  youtube:    { pl: "YOUTUBE", de: "YOUTUBE" },
-  discord:    { pl: "DISCORD", de: "DISCORD" },
-  mem:        { pl: "MEM", de: "MEME" },
-  netflix:    { pl: "NETFLIX", de: "NETFLIX" },
-
-  ubranie:    { pl: "UBRANIE", de: "KLEIDUNG" },
-  buty:       { pl: "BUTY", de: "SCHUHE" },
-  czapka:     { pl: "CZAPKA", de: "MÜTZE" },
-  kurtka:     { pl: "KURTKA", de: "JACKE" },
-  plecak:     { pl: "PLECAK", de: "RUCKSACK" }
+  body: {
+    oko: { pl: "OKO", de: "AUGE" },
+    ucho:{ pl: "UCHO", de: "OHR" },
+    nos: { pl: "NOS", de: "NASE" },
+    reka:{ pl: "RĘKA", de: "HAND" },
+    noga:{ pl: "NOGA", de: "BEIN" },
+  },
+  animals: {
+    kot: { pl: "KOT", de: "KATZE" },
+    pies:{ pl: "PIES", de: "HUND" },
+    ptak:{ pl: "PTAK", de: "VOGEL" },
+    ryba:{ pl: "RYBA", de: "FISCH" },
+    kon: { pl: "KOŃ", de: "PFERD" },
+  },
+  places: {
+    dom:   { pl: "DOM", de: "HAUS" },
+    szkola:{ pl: "SZKOŁA", de: "SCHULE" },
+    praca: { pl: "PRACA", de: "ARBEIT" },
+    miasto:{ pl: "MIASTO", de: "STADT" },
+    wies:  { pl: "WIEŚ", de: "DORF" },
+    park:  { pl: "PARK", de: "PARK" },
+    las:   { pl: "LAS", de: "WALD" },
+    jezioro:{ pl: "JEZIORO", de: "SEE" },
+    morze:  { pl: "MORZE", de: "MEER" },
+    gory:   { pl: "GÓRY", de: "BERGE" },
+  },
+  transport: {
+    auto:   { pl: "AUTO", de: "AUTO" },
+    rower:  { pl: "ROWER", de: "FAHRRAD" },
+    pociag: { pl: "POCIĄG", de: "ZUG" },
+    autobus:{ pl: "AUTOBUS", de: "BUS" },
+    tramwaj:{ pl: "TRAMWAJ", de: "STRAßENBAHN" },
+  },
+  tech: {
+    telefon:  { pl: "TELEFON", de: "HANDY" },
+    komputer: { pl: "KOMPUTER", de: "COMPUTER" },
+    internet: { pl: "INTERNET", de: "INTERNET" },
+    gra:      { pl: "GRA", de: "SPIEL" },
+    film:     { pl: "FILM", de: "FILM" },
+  },
+  food: {
+    pizza:     { pl: "PIZZA", de: "PIZZA" },
+    hamburger: { pl: "HAMBURGER", de: "HAMBURGER" },
+    kanapka:   { pl: "KANAPKA", de: "SANDWICH" },
+    makaron:   { pl: "MAKARON", de: "NUDELN" },
+    zupa:      { pl: "ZUPA", de: "SUPPE" },
+  },
+  drinks: {
+    woda:    { pl: "WODA", de: "WASSER" },
+    kawa:    { pl: "KAWA", de: "KAFFEE" },
+    herbata: { pl: "HERBATA", de: "TEE" },
+    sok:     { pl: "SOK", de: "SAFT" },
+    mleko:   { pl: "MLEKO", de: "MILCH" },
+  },
+  seasons: {
+    lato:   { pl: "LATO", de: "SOMMER" },
+    zima:   { pl: "ZIMA", de: "WINTER" },
+    wiosna: { pl: "WIOSNA", de: "FRÜHLING" },
+    jesien: { pl: "JESIEŃ", de: "HERBST" },
+  },
+  weather: {
+    pogoda: { pl: "POGODA", de: "WETTER" },
+    deszcz: { pl: "DESZCZ", de: "REGEN" },
+    snieg:  { pl: "ŚNIEG", de: "SCHNEE" },
+    wiatr:  { pl: "WIATR", de: "WIND" },
+    slonce: { pl: "SŁOŃCE", de: "SONNE" },
+    chmury: { pl: "CHMURY", de: "WOLKEN" },
+  },
+  events: {
+    wakacje:{ pl: "WAKACJE", de: "URLAUB" },
+    weekend:{ pl: "WEEKEND", de: "WOCHENENDE" },
+    impreza:{ pl: "IMPREZA", de: "PARTY" },
+    koncert:{ pl: "KONCERT", de: "KONZERT" },
+  },
+  sport: {
+    sport:    { pl: "SPORT", de: "SPORT" },
+    pilka:    { pl: "PIŁKA", de: "BALL" },
+    mecz:     { pl: "MECZ", de: "SPIEL" },
+    basen:    { pl: "BASEN", de: "SCHWIMMBAD" },
+    silownia: { pl: "SIŁOWNIA", de: "FITNESSSTUDIO" },
+    bieganie: { pl: "BIEGANIE", de: "LAUFEN" },
+  },
+  shopping: {
+    pieniadze:{ pl: "PIENIĄDZE", de: "GELD" },
+    sklep:    { pl: "SKLEP", de: "LADEN" },
+    zakupy:   { pl: "ZAKUPY", de: "EINKAUF" },
+    prezent:  { pl: "PREZENT", de: "GESCHENK" },
+    promocja: { pl: "PROMOCJA", de: "ANGEBOT" },
+  },
+  time: {
+    czas:   { pl: "CZAS", de: "ZEIT" },
+    dzien:  { pl: "DZIEŃ", de: "TAG" },
+    noc:    { pl: "NOC", de: "NACHT" },
+    rano:   { pl: "RANO", de: "MORGEN" },
+    wieczor:{ pl: "WIECZÓR", de: "ABEND" },
+  },
+  relations: {
+    milosc:   { pl: "MIŁOŚĆ", de: "LIEBE" },
+    przyjazn: { pl: "PRZYJAŹŃ", de: "FREUNDSCHAFT" },
+    rodzina:  { pl: "RODZINA", de: "FAMILIE" },
+    dziecko:  { pl: "DZIECKO", de: "KIND" },
+    rodzice:  { pl: "RODZICE", de: "ELTERN" },
+  },
+  school: {
+    nauczyciel:{ pl: "NAUCZYCIEL", de: "LEHRER" },
+    uczen:     { pl: "UCZEŃ", de: "SCHÜLER" },
+    ksiazka:   { pl: "KSIĄŻKA", de: "BUCH" },
+    zeszyt:    { pl: "ZESZYT", de: "HEFT" },
+    dlugopis:  { pl: "DŁUGOPIS", de: "KUGELSCHREIBER" },
+  },
+  home: {
+    stol:    { pl: "STÓŁ", de: "TISCH" },
+    krzeslo: { pl: "KRZESŁO", de: "STUHL" },
+    lozko:   { pl: "ŁÓŻKO", de: "BETT" },
+    okno:    { pl: "OKNO", de: "FENSTER" },
+    drzwi:   { pl: "DRZWI", de: "TÜR" },
+    kuchnia: { pl: "KUCHNIA", de: "KÜCHE" },
+    lazienka:{ pl: "ŁAZIENKA", de: "BADEZIMMER" },
+    pokoj:   { pl: "POKÓJ", de: "ZIMMER" },
+    ogrod:   { pl: "OGRÓD", de: "GARTEN" },
+    balkon:  { pl: "BALKON", de: "BALKON" },
+  },
+  jobs: {
+    policja:     { pl: "POLICJA", de: "POLIZEI" },
+    lekarz:      { pl: "LEKARZ", de: "ARZT" },
+    pielegniarka:{ pl:"PIELĘGNIARKA", de:"KRANKENSCHWESTER" },
+    strazak:     { pl: "STRAŻAK", de: "FEUERWEHRMANN" },
+    mechanik:    { pl: "MECHANIK", de: "MECHANIKER" },
+  },
+  sweets: {
+    lod:      { pl: "LÓD", de: "EIS" },
+    lody:     { pl: "LODY", de: "EISCREME" },
+    ciasto:   { pl: "CIASTO", de: "KUCHEN" },
+    czekolada:{ pl: "CZEKOLADA", de: "SCHOKOLADE" },
+    cukier:   { pl: "CUKIER", de: "ZUCKER" },
+  },
+  music: {
+    muzyka:  { pl: "MUZYKA", de: "MUSIK" },
+    gitara:  { pl: "GITARA", de: "GITARRE" },
+    pianino: { pl: "PIANINO", de: "KLAVIER" },
+    taniec:  { pl: "TANIEC", de: "TANZ" },
+    piosenka:{ pl: "PIOSENKA", de: "LIED" },
+  },
+  social: {
+    facebook:{ pl: "FACEBOOK", de: "FACEBOOK" },
+    youtube: { pl: "YOUTUBE", de: "YOUTUBE" },
+    discord: { pl: "DISCORD", de: "DISCORD" },
+    mem:     { pl: "MEM", de: "MEME" },
+    netflix: { pl: "NETFLIX", de: "NETFLIX" },
+  },
+  clothes: {
+    ubranie:{ pl: "UBRANIE", de: "KLEIDUNG" },
+    buty:   { pl: "BUTY", de: "SCHUHE" },
+    czapka: { pl: "CZAPKA", de: "MÜTZE" },
+    kurtka: { pl: "KURTKA", de: "JACKE" },
+    plecak: { pl: "PLECAK", de: "RUCKSACK" },
+  }
 };
 
 /* ====== STAN GRY ====== */
@@ -285,6 +330,10 @@ let playerId = Math.random().toString(36).substring(2,9);
 let roomRef = null;
 let isHost = false;
 let playerName = "";
+
+// do kontroli rund i countdownu
+let lastSeenRound = null;
+let countdownTimer = null;
 
 /* ====== TŁUMACZENIA UI ====== */
 let lang = "pl";
@@ -311,7 +360,10 @@ const t = {
     word: "🔤 Hasło",
     roundStarted: "Runda rozpoczęta!",
     myName: "Twoje imię",
-    wordMissing: "Brak tłumaczenia hasła"
+    wordMissing: "Brak tłumaczenia hasła",
+    category: "📚 Kategoria",
+    startingIn: "Nowa runda za",
+    revealSoon: "Szykuj się"
   },
   de: {
     title: "🕵️‍♂️ IMPOSTOR SPIEL",
@@ -335,13 +387,37 @@ const t = {
     word: "🔤 Wort",
     roundStarted: "Runde gestartet!",
     myName: "Dein Name",
-    wordMissing: "Keine Übersetzung für das Wort"
+    wordMissing: "Keine Übersetzung für das Wort",
+    category: "📚 Kategorie",
+    startingIn: "Neue Runde in",
+    revealSoon: "Mach dich bereit"
   }
 };
 
-function getWordForLang(wordKey) {
-  if (!wordKey || !WORDS[wordKey]) return null;
-  return WORDS[wordKey][lang] || null;
+function getCategoryName(catKey) {
+  return (CATEGORIES[catKey] && CATEGORIES[catKey][lang]) ? CATEGORIES[catKey][lang] : (catKey || "");
+}
+
+function getWordForLang(catKey, wordKey) {
+  if (!catKey || !wordKey || !WORDS[catKey] || !WORDS[catKey][wordKey]) return null;
+  return WORDS[catKey][wordKey][lang] || null;
+}
+
+function allWordPairs() {
+  const pairs = [];
+  for (const catKey of Object.keys(WORDS)) {
+    for (const wordKey of Object.keys(WORDS[catKey])) {
+      pairs.push({ catKey, wordKey, id: `${catKey}:${wordKey}` });
+    }
+  }
+  return pairs;
+}
+
+function pickUnusedWord(usedWords = []) {
+  const usedSet = new Set(usedWords);
+  const pool = allWordPairs().filter(p => !usedSet.has(p.id));
+  const finalPool = pool.length ? pool : allWordPairs(); // jak się skończą — reset puli, żeby nie zablokować gry
+  return finalPool[Math.floor(Math.random() * finalPool.length)];
 }
 
 function applyLang() {
@@ -365,7 +441,7 @@ function applyLang() {
     document.getElementById("waitingText").innerText = t[lang].waiting;
   }
 
-  // odśwież licznik graczy, jeśli jesteśmy w pokoju
+  // odśwież licznik graczy
   if (roomRef) updatePlayerList();
 
   // odśwież "Twoje imię"
@@ -374,26 +450,8 @@ function applyLang() {
     myNameDiv.innerText = `${t[lang].myName}: ${playerName}`;
   }
 
-  // ✅ kluczowe: jeśli już pokazujemy wynik i gra trwa, przelicz hasło na nowy język
+  // ważne: po zmianie języka odśwież aktualny stan (kategoria + countdown + hasło) w nowym języku
   refreshCurrentResult();
-}
-
-function refreshCurrentResult() {
-  if (!roomRef) return;
-  roomRef.get().then(snap => {
-    const data = snap.val();
-    if (!data || !data.started || !data.roles) return;
-
-    const role = data.roles[playerId];
-    if (role === "impostor") {
-      showResult(t[lang].impostor);
-      return;
-    }
-    if (role !== "host") {
-      const w = getWordForLang(data.wordKey);
-      showResult(`${t[lang].word}: ${w || t[lang].wordMissing}`);
-    }
-  });
 }
 
 applyLang();
@@ -417,6 +475,54 @@ function showResult(text) {
   }
 }
 
+function clearCountdown() {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+}
+
+function runCountdownAndReveal(roomData) {
+  clearCountdown();
+
+  const revealAt = roomData.revealAt;
+  const catKey = roomData.categoryKey;
+  const wordKey = roomData.wordKey;
+
+  const tick = () => {
+    const catName = getCategoryName(catKey);
+    const msLeft = Math.max(0, (revealAt || 0) - Date.now());
+    const secLeft = Math.ceil(msLeft / 1000);
+
+    // countdown 3..2..1
+    if (secLeft > 0) {
+      showResult(`${t[lang].category}: ${catName}\n\n${t[lang].startingIn}: ${secLeft}`);
+      return;
+    }
+
+    // REVEAL
+    clearCountdown();
+    const role = roomData.roles && roomData.roles[playerId];
+
+    if (role === "impostor") {
+      showResult(`${t[lang].category}: ${catName}\n\n${t[lang].impostor}`);
+      return;
+    }
+
+    if (role !== "host") {
+      const w = getWordForLang(catKey, wordKey);
+      showResult(`${t[lang].category}: ${catName}\n\n${t[lang].word}: ${w || t[lang].wordMissing}`);
+      return;
+    }
+
+    // host
+    showResult(`${t[lang].category}: ${catName}\n\n${t[lang].roundStarted}`);
+  };
+
+  tick();
+  countdownTimer = setInterval(tick, 200);
+}
+
 async function getNonHostCount(roomData) {
   const playersObj = roomData.players || {};
   const names = Object.values(playersObj).map(p => p.name || "");
@@ -436,6 +542,17 @@ async function updatePlayerList() {
   document.getElementById("players").innerText = `${t[lang].players}: ${nonHostCount}/${MAX_PLAYERS}`;
 }
 
+function refreshCurrentResult() {
+  if (!roomRef) return;
+  roomRef.get().then(snap => {
+    const data = snap.val();
+    if (!data || !data.started || !data.roles || !data.wordKey || !data.categoryKey || !data.revealAt) return;
+
+    // przelicz w nowym języku (kategoria + countdown / hasło)
+    runCountdownAndReveal(data);
+  });
+}
+
 /* ====== Tworzenie pokoju ====== */
 window.createRoom = async function() {
   playerName = document.getElementById("playerName").value.trim();
@@ -447,7 +564,13 @@ window.createRoom = async function() {
 
   const code = randomCode();
   roomRef = db.ref("rooms/" + code);
-  await roomRef.set({ players: {}, started: false });
+
+  await roomRef.set({
+    players: {},
+    started: false,
+    round: 0,
+    usedWords: [] // <— historia haseł w pokoju
+  });
 
   document.getElementById("menu").classList.add("hidden");
   document.getElementById("hostPanel").classList.remove("hidden");
@@ -459,16 +582,17 @@ window.createRoom = async function() {
   roomRef.on("value", async snapshot => {
     await updatePlayerList();
     const data = snapshot.val();
-    if (data && data.started && data.roles && data.wordKey) {
-      const role = data.roles[playerId];
-      if (role === "impostor") showResult(t[lang].impostor);
-      else if (role !== "host") {
-        const w = getWordForLang(data.wordKey);
-        showResult(`${t[lang].word}: ${w || t[lang].wordMissing}`);
+    if (data && data.started && data.roles && data.wordKey && data.categoryKey && data.revealAt) {
+      if (lastSeenRound !== data.round) {
+        lastSeenRound = data.round;
+        runCountdownAndReveal(data);
+      } else {
+        // jeśli język zmieniony lub ktoś dołączył później — odśwież ekran (bez restartu rundy)
+        runCountdownAndReveal(data);
       }
     }
   });
-}
+};
 
 /* ====== Dołączenie do pokoju ====== */
 window.joinRoom = async function() {
@@ -500,16 +624,16 @@ window.joinRoom = async function() {
   roomRef.on("value", snapshot => {
     updatePlayerList();
     const d = snapshot.val();
-    if (d && d.started && d.roles && d.wordKey) {
-      const role = d.roles[playerId];
-      if (role === "impostor") showResult(t[lang].impostor);
-      else if (role !== "host") {
-        const w = getWordForLang(d.wordKey);
-        showResult(`${t[lang].word}: ${w || t[lang].wordMissing}`);
+    if (d && d.started && d.roles && d.wordKey && d.categoryKey && d.revealAt) {
+      if (lastSeenRound !== d.round) {
+        lastSeenRound = d.round;
+        runCountdownAndReveal(d);
+      } else {
+        runCountdownAndReveal(d);
       }
     }
   });
-}
+};
 
 /* ====== Start gry (host) ====== */
 window.startGame = async function() {
@@ -522,18 +646,30 @@ window.startGame = async function() {
 
   if (players.length !== MAX_PLAYERS) return alert(t[lang].needExact);
 
-  const keys = Object.keys(WORDS);
-  const wordKey = keys[Math.floor(Math.random() * keys.length)];
+  const usedWords = data.usedWords || [];
+  const chosen = pickUnusedWord(usedWords); // {catKey, wordKey, id}
 
   const impostor = players[Math.floor(Math.random() * players.length)];
   const roles = {};
   players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
   roles[playerId] = "host";
 
-  await roomRef.update({ started: true, roles, wordKey });
+  const round = (data.round || 0) + 1;
+  const revealAt = Date.now() + 3000; // 3 sekundy => 3..2..1
+
+  await roomRef.update({
+    started: true,
+    roles,
+    round,
+    categoryKey: chosen.catKey,
+    wordKey: chosen.wordKey,
+    revealAt,
+    usedWords: [...usedWords, chosen.id]
+  });
+
   document.getElementById("btnNextRound").classList.remove("hidden");
-  showResult(t[lang].roundStarted);
-}
+  showResult(`${t[lang].revealSoon}...`);
+};
 
 /* ====== Kolejna runda (host) ====== */
 window.nextRound = async function() {
@@ -544,17 +680,29 @@ window.nextRound = async function() {
   const players = Object.keys(data.players || {})
     .filter(id => !(data.players[id].name || "").includes("(HOST)"));
 
-  const keys = Object.keys(WORDS);
-  const wordKey = keys[Math.floor(Math.random() * keys.length)];
+  const usedWords = data.usedWords || [];
+  const chosen = pickUnusedWord(usedWords);
 
   const impostor = players[Math.floor(Math.random() * players.length)];
   const roles = {};
   players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
   roles[playerId] = "host";
 
-  await roomRef.update({ started: true, roles, wordKey });
+  const round = (data.round || 0) + 1;
+  const revealAt = Date.now() + 3000;
+
+  await roomRef.update({
+    started: true,
+    roles,
+    round,
+    categoryKey: chosen.catKey,
+    wordKey: chosen.wordKey,
+    revealAt,
+    usedWords: [...usedWords, chosen.id]
+  });
+
   document.getElementById("result").classList.add("hidden");
-}
+};
 
 /* ====== Eventy ====== */
 document.getElementById("btnCreate").addEventListener("click", createRoom);
@@ -567,6 +715,3 @@ document.getElementById("btnLangDe").addEventListener("click", () => { lang = "d
 </script>
 </body>
 </html>
-
-
-
