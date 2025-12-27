@@ -241,7 +241,7 @@ input:focus{
   font-weight: 650;
 }
 
-/* Animacja kart (opcjonalna wisienka) */
+/* Animacja kart */
 @keyframes pop {
   from { transform: translateY(6px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
@@ -270,16 +270,16 @@ input:focus{
 </div>
 
 <div id="menu">
-  <input id="playerName" placeholder="TWOJĘ IMIĘ" />
+  <input id="playerName" placeholder="TWOJE IMIĘ" />
   <button id="btnCreate">STWÓRZ GRĘ</button>
-  <p id="orText" style="margin:10px 0;">lub</p>
+  <p id="orText" style="margin:10px 0;">LUB</p>
   <input id="joinCode" placeholder="KOD POKOJU" />
   <button id="btnJoin">DOŁĄCZ</button>
 </div>
 
 <div id="hostPanel" class="hidden">
   <h2><span id="roomCodeLabel">KOD POKOJU:</span> <span id="roomCode"></span></h2>
-  <p id="players">GRACZE: 0/10</p>
+  <p id="players">GRACZE: 0/15</p>
   <p id="playerList"></p>
   <button id="btnStart">ROZDAJ ROLE</button>
   <button id="btnNextRound" class="hidden">ROZLOSUJ KOLEJNĄ RUNDĘ</button>
@@ -298,7 +298,8 @@ input:focus{
 
 <script>
 /* ====== USTAWIENIE: ILOŚĆ GRACZY (bez hosta) ====== */
-const MAX_PLAYERS = 3-10;
+const MIN_PLAYERS = 3;
+const MAX_PLAYERS = 15;
 
 /* ====== Firebase ====== */
 const firebaseConfig = {
@@ -507,16 +508,16 @@ let roomRef = null;
 let isHost = false;
 let playerName = "";
 
-// do kontroli rund i countdownu
+/* ====== kontrola rund i countdownu ====== */
 let lastSeenRound = null;
 let countdownTimer = null;
 
-/* ====== TŁUMACZENIA UI ====== */
+/* ====== TŁUMACZENIA UI (WIELKIE LITERY) ====== */
 let lang = "pl";
 const t = {
   pl: {
     title: "🕵️‍♂️ IMPOSTOR GAME",
-    yourNamePh: "TWOJĘ IMIĘ",
+    yourNamePh: "TWOJE IMIĘ",
     create: "STWÓRZ GRĘ",
     or: "LUB",
     joinCodePh: "KOD POKOJU",
@@ -531,7 +532,7 @@ const t = {
     enterRoom: "PODAJ KOD POKOJU!",
     noRoom: "POKÓJ NIE ISTNIEJE!",
     full: "POKÓJ JEST PEŁNY!",
-    needExact: `MUSI BYĆ DOKŁADNIE ${MAX_PLAYERS} GRACZY (bez hosta)!`,
+    needRange: `MUSI BYĆ OD ${MIN_PLAYERS} DO ${MAX_PLAYERS} GRACZY (BEZ HOSTA)!`,
     impostor: "🕵️‍♂️ JESTEŚ IMPOSTOREM!",
     word: "🔤 HASŁO",
     roundStarted: "RUNDA ROZPOCZĘTA!",
@@ -541,33 +542,33 @@ const t = {
     startingIn: "NOWA RUNDA ZA",
     revealSoon: "SZYKUJ SIĘ"
   },
-de: {
-  title: "🕵️‍♂️ IMPOSTOR SPIEL",
-  yourNamePh: "DEIN NAME",
-  create: "SPIEL ERSTELLEN",
-  or: "ODER",
-  joinCodePh: "RAUMCODE",
-  join: "BEITRETEN",
-  roomCode: "RAUMCODE:",
-  players: "SPIELER",
-  dealRoles: "ROLLEN VERTEILEN",
-  nextRound: "NÄCHSTE RUNDE AUSLOSEN",
-  waiting: "WARTEN AUF DEN START...",
-  guess: "FINDE DEN IMPOSTOR",
-  enterName: "GIB EINEN NAMEN EIN!",
-  enterRoom: "GIB DEN RAUMCODE EIN!",
-  noRoom: "RAUM EXISTIERT NICHT!",
-  full: "DER RAUM IST VOLL!",
-  needExact: `ES MÜSSEN GENAU ${MAX_PLAYERS} SPIELER SEIN (OHNE HOST)!`,
-  impostor: "🕵️‍♂️ DU BIST DER IMPOSTOR!",
-  word: "🔤 WORT",
-  roundStarted: "RUNDE GESTARTET!",
-  myName: "DEIN NAME",
-  wordMissing: "KEINE ÜBERSETZUNG FÜR DAS WORT",
-  category: "📚 KATEGORIE",
-  startingIn: "NEUE RUNDE IN",
-  revealSoon: "MACH DICH BEREIT"
-}
+  de: {
+    title: "🕵️‍♂️ IMPOSTOR SPIEL",
+    yourNamePh: "DEIN NAME",
+    create: "SPIEL ERSTELLEN",
+    or: "ODER",
+    joinCodePh: "RAUMCODE",
+    join: "BEITRETEN",
+    roomCode: "RAUMCODE:",
+    players: "SPIELER",
+    dealRoles: "ROLLEN VERTEILEN",
+    nextRound: "NÄCHSTE RUNDE AUSLOSEN",
+    waiting: "WARTEN AUF DEN START...",
+    guess: "FINDE DEN IMPOSTOR",
+    enterName: "GIB EINEN NAMEN EIN!",
+    enterRoom: "GIB DEN RAUMCODE EIN!",
+    noRoom: "RAUM EXISTIERT NICHT!",
+    full: "DER RAUM IST VOLL!",
+    needRange: `ES MÜSSEN ${MIN_PLAYERS} BIS ${MAX_PLAYERS} SPIELER SEIN (OHNE HOST)!`,
+    impostor: "🕵️‍♂️ DU BIST DER IMPOSTOR!",
+    word: "🔤 WORT",
+    roundStarted: "RUNDE GESTARTET!",
+    myName: "DEIN NAME",
+    wordMissing: "KEINE ÜBERSETZUNG FÜR DAS WORT",
+    category: "📚 KATEGORIE",
+    startingIn: "NEUE RUNDE IN",
+    revealSoon: "MACH DICH BEREIT"
+  }
 };
 
 function getCategoryName(catKey) {
@@ -592,8 +593,18 @@ function allWordPairs() {
 function pickUnusedWord(usedWords = []) {
   const usedSet = new Set(usedWords);
   const pool = allWordPairs().filter(p => !usedSet.has(p.id));
-  const finalPool = pool.length ? pool : allWordPairs(); // reset puli jeśli zabraknie
+  const finalPool = pool.length ? pool : allWordPairs();
   return finalPool[Math.floor(Math.random() * finalPool.length)];
+}
+
+/* ====== 1-2 IMPOSTORÓW ====== */
+function pickImpostorCount(playerCount) {
+  if (playerCount > 6) return Math.random() < 0.5 ? 2 : 1;
+  return 1;
+}
+function pickUniqueImpostors(players, count) {
+  const shuffled = [...players].sort(() => Math.random() - 0.5);
+  return new Set(shuffled.slice(0, Math.min(count, players.length)));
 }
 
 function applyLang() {
@@ -666,22 +677,18 @@ function runCountdownAndReveal(roomData) {
     const msLeft = Math.max(0, (revealAt || 0) - Date.now());
     const secLeft = Math.ceil(msLeft / 1000);
 
-    // reset border na “neutral/green” (żeby nie zostawał czerwony po impostorze)
     document.getElementById("result").style.borderColor = "rgba(35,48,65,.85)";
 
-    // countdown 3..2..1
     if (secLeft > 0) {
       showResult(`${t[lang].category}: ${catName}\n\n${t[lang].startingIn}: ${secLeft}`);
       return;
     }
 
-    // REVEAL
     clearCountdown();
     const role = roomData.roles && roomData.roles[playerId];
 
     if (role === "impostor") {
       showResult(`${t[lang].category}: ${catName}\n\n${t[lang].impostor}`);
-      // czerwony akcent dla impostora
       document.getElementById("result").style.borderColor = "rgba(255,77,109,.65)";
       return;
     }
@@ -692,7 +699,6 @@ function runCountdownAndReveal(roomData) {
       return;
     }
 
-    // host
     showResult(`${t[lang].category}: ${catName}\n\n${t[lang].roundStarted}`);
   };
 
@@ -818,14 +824,18 @@ window.startGame = async function() {
   const players = Object.keys(data.players || {})
     .filter(id => !(data.players[id].name || "").includes("(HOST)"));
 
-  if (players.length !== MAX_PLAYERS) return alert(t[lang].needExact);
+  if (players.length < MIN_PLAYERS || players.length > MAX_PLAYERS) {
+    return alert(t[lang].needRange);
+  }
 
   const usedWords = data.usedWords || [];
   const chosen = pickUnusedWord(usedWords);
 
-  const impostor = players[Math.floor(Math.random() * players.length)];
+  const impostorCount = pickImpostorCount(players.length);
+  const impostors = pickUniqueImpostors(players, impostorCount);
+
   const roles = {};
-  players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
+  players.forEach(p => roles[p] = (impostors.has(p) ? "impostor" : "normal"));
   roles[playerId] = "host";
 
   const round = (data.round || 0) + 1;
@@ -857,9 +867,11 @@ window.nextRound = async function() {
   const usedWords = data.usedWords || [];
   const chosen = pickUnusedWord(usedWords);
 
-  const impostor = players[Math.floor(Math.random() * players.length)];
+  const impostorCount = pickImpostorCount(players.length);
+  const impostors = pickUniqueImpostors(players, impostorCount);
+
   const roles = {};
-  players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
+  players.forEach(p => roles[p] = (impostors.has(p) ? "impostor" : "normal"));
   roles[playerId] = "host";
 
   const round = (data.round || 0) + 1;
@@ -889,4 +901,3 @@ document.getElementById("btnLangDe").addEventListener("click", () => { lang = "d
 </script>
 </body>
 </html>
-
