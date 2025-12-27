@@ -297,7 +297,7 @@ input:focus{
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-/* ====== USTAWIENIE: ILOŚĆ GRACZY (bez hosta) ====== */
+/* ====== USTAWIENIA: ILOŚĆ GRACZY (bez hosta) ====== */
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 15;
 
@@ -597,11 +597,17 @@ function pickUnusedWord(usedWords = []) {
   return finalPool[Math.floor(Math.random() * finalPool.length)];
 }
 
-/* ====== 1-2 IMPOSTORÓW ====== */
+/* ====== (10) LEPSZY DOBÓR IMPOSTORÓW ======
+   - 1 impostor zawsze do 6 graczy
+   - 7–9 graczy: 30% szans na 2 impostorów
+   - 10–15 graczy: 60% szans na 2 impostorów
+*/
 function pickImpostorCount(playerCount) {
-  if (playerCount > 6) return Math.random() < 0.5 ? 2 : 1;
-  return 1;
+  if (playerCount <= 6) return 1;
+  if (playerCount <= 9) return (Math.random() < 0.30) ? 2 : 1;
+  return (Math.random() < 0.60) ? 2 : 1;
 }
+
 function pickUniqueImpostors(players, count) {
   const shuffled = [...players].sort(() => Math.random() - 0.5);
   return new Set(shuffled.slice(0, Math.min(count, players.length)));
@@ -734,6 +740,15 @@ function refreshCurrentResult() {
   });
 }
 
+/* ====== (1) SPRZĄTANIE GRACZA PO ROZŁĄCZENIU ======
+   Usuwa wpis /players/{playerId} gdy ktoś zamknie kartę / straci połączenie.
+*/
+function setupAutoRemovePlayerOnDisconnect(code) {
+  const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
+  // jeśli połączenie z serwerem zostanie utracone -> usuń gracza
+  playerRef.onDisconnect().remove();
+}
+
 /* ====== Tworzenie pokoju ====== */
 window.createRoom = async function() {
   playerName = document.getElementById("playerName").value.trim();
@@ -759,6 +774,9 @@ window.createRoom = async function() {
 
   const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
   await playerRef.set({ name: playerName });
+
+  // (1) auto-usuwanie hosta po rozłączeniu
+  setupAutoRemovePlayerOnDisconnect(code);
 
   roomRef.on("value", async snapshot => {
     await updatePlayerList();
@@ -794,6 +812,9 @@ window.joinRoom = async function() {
 
   const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
   await playerRef.set({ name: playerName });
+
+  // (1) auto-usuwanie gracza po rozłączeniu
+  setupAutoRemovePlayerOnDisconnect(code);
 
   showMyName();
 
