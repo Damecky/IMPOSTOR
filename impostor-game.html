@@ -36,7 +36,7 @@ body{
   color: var(--text);
   text-align: center;
   margin: 0;
-  padding: 24px 14px 40px;
+  padding: 18px 14px 40px;
   overflow-x:hidden;
 }
 
@@ -53,13 +53,34 @@ body::before{
   mix-blend-mode: overlay;
 }
 
-/* Nagłówek */
-h1{
-  margin: 18px 0 18px;
-  font-size: clamp(30px, 4.6vw, 44px);
-  letter-spacing:.5px;
-  color: var(--text);
-  text-shadow: 0 0 22px rgba(0,210,106,.22);
+/* ====== LOGO1 ZAMIAST NAPISU "IMPOSTOR GAME" ====== */
+.topLogoBar{
+  width: min(760px, 94vw);
+  margin: 6px auto 10px;
+  padding: 10px 12px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(17,24,36,.70), rgba(17,24,36,.42));
+  border: 1px solid rgba(35,48,65,.65);
+  box-shadow: 0 14px 44px rgba(0,0,0,.40);
+  backdrop-filter: blur(10px);
+}
+
+.topLogoBar img{
+  /* To jest docelowa wielkość “jak stary napis” */
+  height: 56px;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+
+  /* delikatne dopasowanie do neonów strony */
+  filter:
+    drop-shadow(0 0 16px rgba(0,210,106,.18))
+    drop-shadow(0 0 14px rgba(255,77,109,.14));
+}
+
+@media (max-width: 420px){
+  .topLogoBar img{ height: 48px; }
 }
 
 /* “App shell” */
@@ -75,8 +96,13 @@ h1{
 }
 
 /* Teksty */
-p, h2{ margin: 10px 0; }
-#orText{ color: var(--muted); font-weight: 600; }
+p, h2{
+  margin: 10px 0;
+}
+#orText{
+  color: var(--muted);
+  font-weight: 600;
+}
 
 /* Przyciski języka */
 .smallBtnRow{
@@ -84,7 +110,7 @@ p, h2{ margin: 10px 0; }
   gap:10px;
   justify-content:center;
   flex-wrap:wrap;
-  margin: 6px auto 16px;
+  margin: 6px auto 14px;
 }
 
 /* Buttony */
@@ -252,7 +278,7 @@ input:focus{
   #menu, #hostPanel, #waiting{ padding: 16px 12px; }
 }
 
-/* ====== INTRO Z LOGO (logo.png w tym samym folderze co HTML) ====== */
+/* ====== INTRO (opcjonalne) ====== */
 #intro{
   position: fixed;
   inset: 0;
@@ -342,7 +368,7 @@ input:focus{
 
 <body>
 
-<!-- INTRO (logo.png musi być w tym samym folderze co ten plik HTML) -->
+<!-- INTRO: możesz zostawić logo.png lub zmienić na logo1.png -->
 <div id="intro">
   <div class="introCard">
     <img src="logo.png" alt="LOGO" class="introLogoImg" />
@@ -353,7 +379,10 @@ input:focus{
   </div>
 </div>
 
-<h1 id="title">🕵️‍♂️ IMPOSTOR GAME</h1>
+<!-- LOGO1 ZASTĘPUJE NAPIS "🕵️‍♂️ IMPOSTOR GAME" -->
+<header class="topLogoBar">
+  <img src="logo1.png" alt="IMPOSTOR GAME" />
+</header>
 
 <!-- WYBÓR JĘZYKA -->
 <div class="smallBtnRow">
@@ -688,9 +717,14 @@ function hideIntro(){
   setTimeout(() => intro.remove(), 450);
 }
 
-/* ====== helpers słów/kategorii ====== */
+/* ====== KATEGORIE ZAWSZE WIELKIMI LITERAMI ====== */
 function getCategoryName(catKey) {
-  return (CATEGORIES[catKey] && CATEGORIES[catKey][lang]) ? CATEGORIES[catKey][lang] : (catKey || "");
+  const raw =
+    (CATEGORIES[catKey] && CATEGORIES[catKey][lang])
+      ? CATEGORIES[catKey][lang]
+      : (catKey || "");
+  const locale = (lang === "de") ? "de-DE" : "pl-PL";
+  return String(raw).toLocaleUpperCase(locale);
 }
 
 function getWordForLang(catKey, wordKey) {
@@ -715,7 +749,7 @@ function pickUnusedWord(usedWords = []) {
   return finalPool[Math.floor(Math.random() * finalPool.length)];
 }
 
-/* ====== (10) LEPSZY DOBÓR IMPOSTORÓW ======
+/* ====== DOBÓR IMPOSTORÓW ======
    - do 6 graczy: zawsze 1
    - 7–9 graczy: 30% szans na 2
    - 10–15 graczy: 60% szans na 2
@@ -734,7 +768,8 @@ function pickUniqueImpostors(players, count) {
 /* ====== UI języki ====== */
 function applyLang() {
   document.documentElement.lang = lang;
-  document.getElementById("title").innerText = t[lang].title;
+
+  // tytuł karty przeglądarki
   document.title = t[lang].title;
 
   document.getElementById("playerName").placeholder = t[lang].yourNamePh;
@@ -860,7 +895,7 @@ function refreshCurrentResult() {
   });
 }
 
-/* ====== (1) SPRZĄTANIE GRACZA PO ROZŁĄCZENIU ====== */
+/* ====== SPRZĄTANIE GRACZA PO ROZŁĄCZENIU ====== */
 function setupAutoRemovePlayerOnDisconnect(code) {
   const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
   playerRef.onDisconnect().remove();
