@@ -265,28 +265,28 @@ input:focus{
 
 <!-- WYBÓR JĘZYKA -->
 <div class="smallBtnRow">
-  <button id="btnLangPl">🇵🇱 Polski</button>
-  <button id="btnLangDe">🇩🇪 Deutsch</button>
+  <button id="btnLangPl">🇵🇱 POLSKI</button>
+  <button id="btnLangDe">🇩🇪 DEUTSCH</button>
 </div>
 
 <div id="menu">
-  <input id="playerName" placeholder="Twoje imię" />
-  <button id="btnCreate">Stwórz grę</button>
+  <input id="playerName" placeholder="TWOJĘ IMIĘ" />
+  <button id="btnCreate">STWÓRZ GRĘ</button>
   <p id="orText" style="margin:10px 0;">lub</p>
-  <input id="joinCode" placeholder="Kod pokoju" />
-  <button id="btnJoin">Dołącz</button>
+  <input id="joinCode" placeholder="KOD POKOJU" />
+  <button id="btnJoin">DOŁĄCZ</button>
 </div>
 
 <div id="hostPanel" class="hidden">
-  <h2><span id="roomCodeLabel">Kod pokoju:</span> <span id="roomCode"></span></h2>
-  <p id="players">Gracze: 0/4</p>
+  <h2><span id="roomCodeLabel">KOD POKOJU:</span> <span id="roomCode"></span></h2>
+  <p id="players">GRACZE: 0/10</p>
   <p id="playerList"></p>
-  <button id="btnStart">Rozdaj role</button>
-  <button id="btnNextRound" class="hidden">Rozlosuj kolejną rundę</button>
+  <button id="btnStart">ROZDAJ ROLE</button>
+  <button id="btnNextRound" class="hidden">ROZLOSUJ KOLEJNĄ RUNDĘ</button>
 </div>
 
 <div id="waiting" class="hidden">
-  <h2 id="waitingText">Oczekiwanie na rozpoczęcie...</h2>
+  <h2 id="waitingText">OCZEKIWANIE NA ROZPOCZĘCIE...</h2>
 </div>
 
 <div id="myName" class="hidden card"></div>
@@ -298,7 +298,7 @@ input:focus{
 
 <script>
 /* ====== USTAWIENIE: ILOŚĆ GRACZY (bez hosta) ====== */
-const MAX_PLAYERS = 4;
+const MAX_PLAYERS = 3-10;
 
 /* ====== Firebase ====== */
 const firebaseConfig = {
@@ -516,58 +516,58 @@ let lang = "pl";
 const t = {
   pl: {
     title: "🕵️‍♂️ IMPOSTOR GAME",
-    yourNamePh: "Twoje imię",
-    create: "Stwórz grę",
-    or: "lub",
-    joinCodePh: "Kod pokoju",
-    join: "Dołącz",
-    roomCode: "Kod pokoju:",
-    players: "Gracze",
-    dealRoles: "Rozdaj role",
-    nextRound: "Rozlosuj kolejną rundę",
-    waiting: "Oczekiwanie na rozpoczęcie...",
+    yourNamePh: "TWOJĘ IMIĘ",
+    create: "STWÓRZ GRĘ",
+    or: "LUB",
+    joinCodePh: "KOD POKOJU",
+    join: "DOŁĄCZ",
+    roomCode: "KOD POKOJU:",
+    players: "GRACZE",
+    dealRoles: "ROZDAJ ROLE",
+    nextRound: "ROZLOSUJ KOLEJNĄ RUNDĘ",
+    waiting: "OCZEKIWANIE NA ROZPOCZĘCIE...",
     guess: "ZGADNIJ IMPOSTORA",
-    enterName: "Podaj imię!",
-    enterRoom: "Podaj kod pokoju!",
-    noRoom: "Pokój nie istnieje!",
-    full: "Pokój jest pełny!",
-    needExact: `Musi być dokładnie ${MAX_PLAYERS} graczy (bez hosta)!`,
+    enterName: "PODAJ IMIĘ!",
+    enterRoom: "PODAJ KOD POKOJU!",
+    noRoom: "POKÓJ NIE ISTNIEJE!",
+    full: "POKÓJ JEST PEŁNY!",
+    needExact: `MUSI BYĆ DOKŁADNIE ${MAX_PLAYERS} GRACZY (bez hosta)!`,
     impostor: "🕵️‍♂️ JESTEŚ IMPOSTOREM!",
-    word: "🔤 Hasło",
-    roundStarted: "Runda rozpoczęta!",
-    myName: "Twoje imię",
-    wordMissing: "Brak tłumaczenia hasła",
-    category: "📚 Kategoria",
-    startingIn: "Nowa runda za",
-    revealSoon: "Szykuj się"
+    word: "🔤 HASŁO",
+    roundStarted: "RUNDA ROZPOCZĘTA!",
+    myName: "TWOJE IMIĘ",
+    wordMissing: "BRAK TŁUMACZENIA HASŁA",
+    category: "📚 KATEGORIA",
+    startingIn: "NOWA RUNDA ZA",
+    revealSoon: "SZYKUJ SIĘ"
   },
-  de: {
-    title: "🕵️‍♂️ IMPOSTOR SPIEL",
-    yourNamePh: "Dein Name",
-    create: "Spiel erstellen",
-    or: "oder",
-    joinCodePh: "Raumcode",
-    join: "Beitreten",
-    roomCode: "Raumcode:",
-    players: "Spieler",
-    dealRoles: "Rollen verteilen",
-    nextRound: "Nächste Runde auslosen",
-    waiting: "Warten auf den Start...",
-    guess: "FINDE DEN IMPOSTOR",
-    enterName: "Gib einen Namen ein!",
-    enterRoom: "Gib den Raumcode ein!",
-    noRoom: "Raum existiert nicht!",
-    full: "Der Raum ist voll!",
-    needExact: `Es müssen genau ${MAX_PLAYERS} Spieler sein (ohne Host)!`,
-    impostor: "🕵️‍♂️ DU BIST DER IMPOSTOR!",
-    word: "🔤 Wort",
-    roundStarted: "Runde gestartet!",
-    myName: "Dein Name",
-    wordMissing: "Keine Übersetzung für das Wort",
-    category: "📚 Kategorie",
-    startingIn: "Neue Runde in",
-    revealSoon: "Mach dich bereit"
-  }
+de: {
+  title: "🕵️‍♂️ IMPOSTOR SPIEL",
+  yourNamePh: "DEIN NAME",
+  create: "SPIEL ERSTELLEN",
+  or: "ODER",
+  joinCodePh: "RAUMCODE",
+  join: "BEITRETEN",
+  roomCode: "RAUMCODE:",
+  players: "SPIELER",
+  dealRoles: "ROLLEN VERTEILEN",
+  nextRound: "NÄCHSTE RUNDE AUSLOSEN",
+  waiting: "WARTEN AUF DEN START...",
+  guess: "FINDE DEN IMPOSTOR",
+  enterName: "GIB EINEN NAMEN EIN!",
+  enterRoom: "GIB DEN RAUMCODE EIN!",
+  noRoom: "RAUM EXISTIERT NICHT!",
+  full: "DER RAUM IST VOLL!",
+  needExact: `ES MÜSSEN GENAU ${MAX_PLAYERS} SPIELER SEIN (OHNE HOST)!`,
+  impostor: "🕵️‍♂️ DU BIST DER IMPOSTOR!",
+  word: "🔤 WORT",
+  roundStarted: "RUNDE GESTARTET!",
+  myName: "DEIN NAME",
+  wordMissing: "KEINE ÜBERSETZUNG FÜR DAS WORT",
+  category: "📚 KATEGORIE",
+  startingIn: "NEUE RUNDE IN",
+  revealSoon: "MACH DICH BEREIT"
+}
 };
 
 function getCategoryName(catKey) {
@@ -889,3 +889,4 @@ document.getElementById("btnLangDe").addEventListener("click", () => { lang = "d
 </script>
 </body>
 </html>
+
