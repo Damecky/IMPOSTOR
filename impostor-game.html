@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 <title id="pageTitle">🕵️‍♂️ IMPOSTOR GAME</title>
 
 <style>
@@ -75,13 +75,8 @@ h1{
 }
 
 /* Teksty */
-p, h2{
-  margin: 10px 0;
-}
-#orText{
-  color: var(--muted);
-  font-weight: 600;
-}
+p, h2{ margin: 10px 0; }
+#orText{ color: var(--muted); font-weight: 600; }
 
 /* Przyciski języka */
 .smallBtnRow{
@@ -241,7 +236,7 @@ input:focus{
   font-weight: 650;
 }
 
-/* Animacja kart (opcjonalna wisienka) */
+/* Animacja kart */
 @keyframes pop {
   from { transform: translateY(6px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
@@ -256,37 +251,134 @@ input:focus{
   input{ font-size: 16px; }
   #menu, #hostPanel, #waiting{ padding: 16px 12px; }
 }
+
+/* ====== INTRO Z LOGO (logo.png w tym samym folderze co HTML) ====== */
+#intro{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 24px 16px;
+  background:
+    radial-gradient(900px 600px at 20% 10%, rgba(0,210,106,.25), transparent 60%),
+    radial-gradient(700px 500px at 80% 25%, rgba(0,255,168,.16), transparent 60%),
+    linear-gradient(180deg, rgba(7,10,16,.98), rgba(13,17,23,.98));
+  backdrop-filter: blur(10px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+
+#intro.hiddenIntro{
+  opacity: 0;
+  transform: scale(1.03);
+  pointer-events:none;
+}
+
+.introCard{
+  width: min(520px, 94vw);
+  padding: 26px 20px 22px;
+  border-radius: 28px;
+  border: 1px solid rgba(35,48,65,.8);
+  background: linear-gradient(180deg, rgba(17,24,36,.95), rgba(17,24,36,.75));
+  box-shadow: 0 20px 70px rgba(0,0,0,.6);
+  text-align:center;
+}
+
+.introLogoImg{
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  margin: 0 auto 14px;
+  display:block;
+  filter: drop-shadow(0 0 22px rgba(0,210,106,.35));
+  animation: logoPop .6s ease both;
+}
+
+@keyframes logoPop{
+  from{ transform: translateY(14px) scale(.92); opacity:0; }
+  to{ transform: translateY(0) scale(1); opacity:1; }
+}
+
+.introTitle{
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 950;
+  margin: 6px 0 6px;
+}
+
+.introSub{
+  color: rgba(232,238,247,.7);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.introBar{
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  overflow:hidden;
+  border: 1px solid rgba(35,48,65,.7);
+  margin-bottom: 18px;
+}
+
+.introBar span{
+  display:block;
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, var(--brand), var(--brand2));
+  animation: introLoad 1.5s ease forwards;
+}
+
+@keyframes introLoad{
+  to{ width:100%; }
+}
+
+#btnIntroStart{
+  width: 100%;
+  max-width:none;
+}
 </style>
 </head>
 
 <body>
 
+<!-- INTRO (logo.png musi być w tym samym folderze co ten plik HTML) -->
+<div id="intro">
+  <div class="introCard">
+    <img src="logo.png" alt="LOGO" class="introLogoImg" />
+    <div class="introTitle" id="introTitle">IMPOSTOR GAME</div>
+    <div class="introSub" id="introSub">ŁADOWANIE...</div>
+    <div class="introBar"><span></span></div>
+    <button id="btnIntroStart">START</button>
+  </div>
+</div>
+
 <h1 id="title">🕵️‍♂️ IMPOSTOR GAME</h1>
 
 <!-- WYBÓR JĘZYKA -->
 <div class="smallBtnRow">
-  <button id="btnLangPl">🇵🇱 Polski</button>
-  <button id="btnLangDe">🇩🇪 Deutsch</button>
+  <button id="btnLangPl">🇵🇱 POLSKI</button>
+  <button id="btnLangDe">🇩🇪 DEUTSCH</button>
 </div>
 
 <div id="menu">
-  <input id="playerName" placeholder="Twoje imię" />
-  <button id="btnCreate">Stwórz grę</button>
-  <p id="orText" style="margin:10px 0;">lub</p>
-  <input id="joinCode" placeholder="Kod pokoju" />
-  <button id="btnJoin">Dołącz</button>
+  <input id="playerName" placeholder="TWOJE IMIĘ" />
+  <button id="btnCreate">STWÓRZ GRĘ</button>
+  <p id="orText" style="margin:10px 0;">LUB</p>
+  <input id="joinCode" placeholder="KOD POKOJU" />
+  <button id="btnJoin">DOŁĄCZ</button>
 </div>
 
 <div id="hostPanel" class="hidden">
-  <h2><span id="roomCodeLabel">Kod pokoju:</span> <span id="roomCode"></span></h2>
-  <p id="players">Gracze: 0/4</p>
+  <h2><span id="roomCodeLabel">KOD POKOJU:</span> <span id="roomCode"></span></h2>
+  <p id="players">GRACZE: 0/15</p>
   <p id="playerList"></p>
-  <button id="btnStart">Rozdaj role</button>
-  <button id="btnNextRound" class="hidden">Rozlosuj kolejną rundę</button>
+  <button id="btnStart">ROZDAJ ROLE</button>
+  <button id="btnNextRound" class="hidden">ROZLOSUJ KOLEJNĄ RUNDĘ</button>
 </div>
 
 <div id="waiting" class="hidden">
-  <h2 id="waitingText">Oczekiwanie na rozpoczęcie...</h2>
+  <h2 id="waitingText">OCZEKIWANIE NA ROZPOCZĘCIE...</h2>
 </div>
 
 <div id="myName" class="hidden card"></div>
@@ -297,8 +389,9 @@ input:focus{
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-/* ====== USTAWIENIE: ILOŚĆ GRACZY (bez hosta) ====== */
-const MAX_PLAYERS = 4;
+/* ====== USTAWIENIA: ILOŚĆ GRACZY (bez hosta) ====== */
+const MIN_PLAYERS = 3;
+const MAX_PLAYERS = 15;
 
 /* ====== Firebase ====== */
 const firebaseConfig = {
@@ -507,7 +600,7 @@ let roomRef = null;
 let isHost = false;
 let playerName = "";
 
-// do kontroli rund i countdownu
+/* ====== kontrola rund i countdownu ====== */
 let lastSeenRound = null;
 let countdownTimer = null;
 
@@ -516,60 +609,86 @@ let lang = "pl";
 const t = {
   pl: {
     title: "🕵️‍♂️ IMPOSTOR GAME",
-    yourNamePh: "Twoje imię",
-    create: "Stwórz grę",
-    or: "lub",
-    joinCodePh: "Kod pokoju",
-    join: "Dołącz",
-    roomCode: "Kod pokoju:",
-    players: "Gracze",
-    dealRoles: "Rozdaj role",
-    nextRound: "Rozlosuj kolejną rundę",
-    waiting: "Oczekiwanie na rozpoczęcie...",
+    yourNamePh: "TWOJE IMIĘ",
+    create: "STWÓRZ GRĘ",
+    or: "LUB",
+    joinCodePh: "KOD POKOJU",
+    join: "DOŁĄCZ",
+    roomCode: "KOD POKOJU:",
+    players: "GRACZE",
+    dealRoles: "ROZDAJ ROLE",
+    nextRound: "ROZLOSUJ KOLEJNĄ RUNDĘ",
+    waiting: "OCZEKIWANIE NA ROZPOCZĘCIE...",
     guess: "ZGADNIJ IMPOSTORA",
-    enterName: "Podaj imię!",
-    enterRoom: "Podaj kod pokoju!",
-    noRoom: "Pokój nie istnieje!",
-    full: "Pokój jest pełny!",
-    needExact: `Musi być dokładnie ${MAX_PLAYERS} graczy (bez hosta)!`,
+    enterName: "PODAJ IMIĘ!",
+    enterRoom: "PODAJ KOD POKOJU!",
+    noRoom: "POKÓJ NIE ISTNIEJE!",
+    full: "POKÓJ JEST PEŁNY!",
+    needRange: `MUSI BYĆ OD ${MIN_PLAYERS} DO ${MAX_PLAYERS} GRACZY (BEZ HOSTA)!`,
     impostor: "🕵️‍♂️ JESTEŚ IMPOSTOREM!",
-    word: "🔤 Hasło",
-    roundStarted: "Runda rozpoczęta!",
-    myName: "Twoje imię",
-    wordMissing: "Brak tłumaczenia hasła",
-    category: "📚 Kategoria",
-    startingIn: "Nowa runda za",
-    revealSoon: "Szykuj się"
+    word: "🔤 HASŁO",
+    roundStarted: "RUNDA ROZPOCZĘTA!",
+    myName: "TWOJE IMIĘ",
+    wordMissing: "BRAK TŁUMACZENIA HASŁA",
+    category: "📚 KATEGORIA",
+    startingIn: "NOWA RUNDA ZA",
+    revealSoon: "SZYKUJ SIĘ"
   },
   de: {
     title: "🕵️‍♂️ IMPOSTOR SPIEL",
-    yourNamePh: "Dein Name",
-    create: "Spiel erstellen",
-    or: "oder",
-    joinCodePh: "Raumcode",
-    join: "Beitreten",
-    roomCode: "Raumcode:",
-    players: "Spieler",
-    dealRoles: "Rollen verteilen",
-    nextRound: "Nächste Runde auslosen",
-    waiting: "Warten auf den Start...",
+    yourNamePh: "DEIN NAME",
+    create: "SPIEL ERSTELLEN",
+    or: "ODER",
+    joinCodePh: "RAUMCODE",
+    join: "BEITRETEN",
+    roomCode: "RAUMCODE:",
+    players: "SPIELER",
+    dealRoles: "ROLLEN VERTEILEN",
+    nextRound: "NÄCHSTE RUNDE AUSLOSEN",
+    waiting: "WARTEN AUF DEN START...",
     guess: "FINDE DEN IMPOSTOR",
-    enterName: "Gib einen Namen ein!",
-    enterRoom: "Gib den Raumcode ein!",
-    noRoom: "Raum existiert nicht!",
-    full: "Der Raum ist voll!",
-    needExact: `Es müssen genau ${MAX_PLAYERS} Spieler sein (ohne Host)!`,
+    enterName: "GIB EINEN NAMEN EIN!",
+    enterRoom: "GIB DEN RAUMCODE EIN!",
+    noRoom: "RAUM EXISTIERT NICHT!",
+    full: "DER RAUM IST VOLL!",
+    needRange: `ES MÜSSEN ${MIN_PLAYERS} BIS ${MAX_PLAYERS} SPIELER SEIN (OHNE HOST)!`,
     impostor: "🕵️‍♂️ DU BIST DER IMPOSTOR!",
-    word: "🔤 Wort",
-    roundStarted: "Runde gestartet!",
-    myName: "Dein Name",
-    wordMissing: "Keine Übersetzung für das Wort",
-    category: "📚 Kategorie",
-    startingIn: "Neue Runde in",
-    revealSoon: "Mach dich bereit"
+    word: "🔤 WORT",
+    roundStarted: "RUNDE GESTARTET!",
+    myName: "DEIN NAME",
+    wordMissing: "KEINE ÜBERSETZUNG FÜR DAS WORT",
+    category: "📚 KATEGORIE",
+    startingIn: "NEUE RUNDE IN",
+    revealSoon: "MACH DICH BEREIT"
   }
 };
 
+/* ====== INTRO: język + zamykanie ====== */
+function applyIntroLang(){
+  const titleEl = document.getElementById("introTitle");
+  const subEl = document.getElementById("introSub");
+  const btnEl = document.getElementById("btnIntroStart");
+  if (!titleEl || !subEl || !btnEl) return;
+
+  if (lang === "de") {
+    titleEl.innerText = "IMPOSTOR SPIEL";
+    subEl.innerText = "LADEN...";
+    btnEl.innerText = "START";
+  } else {
+    titleEl.innerText = "IMPOSTOR GAME";
+    subEl.innerText = "ŁADOWANIE...";
+    btnEl.innerText = "START";
+  }
+}
+
+function hideIntro(){
+  const intro = document.getElementById("intro");
+  if (!intro) return;
+  intro.classList.add("hiddenIntro");
+  setTimeout(() => intro.remove(), 450);
+}
+
+/* ====== helpers słów/kategorii ====== */
 function getCategoryName(catKey) {
   return (CATEGORIES[catKey] && CATEGORIES[catKey][lang]) ? CATEGORIES[catKey][lang] : (catKey || "");
 }
@@ -592,10 +711,27 @@ function allWordPairs() {
 function pickUnusedWord(usedWords = []) {
   const usedSet = new Set(usedWords);
   const pool = allWordPairs().filter(p => !usedSet.has(p.id));
-  const finalPool = pool.length ? pool : allWordPairs(); // reset puli jeśli zabraknie
+  const finalPool = pool.length ? pool : allWordPairs();
   return finalPool[Math.floor(Math.random() * finalPool.length)];
 }
 
+/* ====== (10) LEPSZY DOBÓR IMPOSTORÓW ======
+   - do 6 graczy: zawsze 1
+   - 7–9 graczy: 30% szans na 2
+   - 10–15 graczy: 60% szans na 2
+*/
+function pickImpostorCount(playerCount) {
+  if (playerCount <= 6) return 1;
+  if (playerCount <= 9) return (Math.random() < 0.30) ? 2 : 1;
+  return (Math.random() < 0.60) ? 2 : 1;
+}
+
+function pickUniqueImpostors(players, count) {
+  const shuffled = [...players].sort(() => Math.random() - 0.5);
+  return new Set(shuffled.slice(0, Math.min(count, players.length)));
+}
+
+/* ====== UI języki ====== */
 function applyLang() {
   document.documentElement.lang = lang;
   document.getElementById("title").innerText = t[lang].title;
@@ -624,6 +760,7 @@ function applyLang() {
   }
 
   refreshCurrentResult();
+  applyIntroLang();
 }
 
 applyLang();
@@ -666,22 +803,18 @@ function runCountdownAndReveal(roomData) {
     const msLeft = Math.max(0, (revealAt || 0) - Date.now());
     const secLeft = Math.ceil(msLeft / 1000);
 
-    // reset border na “neutral/green” (żeby nie zostawał czerwony po impostorze)
     document.getElementById("result").style.borderColor = "rgba(35,48,65,.85)";
 
-    // countdown 3..2..1
     if (secLeft > 0) {
       showResult(`${t[lang].category}: ${catName}\n\n${t[lang].startingIn}: ${secLeft}`);
       return;
     }
 
-    // REVEAL
     clearCountdown();
     const role = roomData.roles && roomData.roles[playerId];
 
     if (role === "impostor") {
       showResult(`${t[lang].category}: ${catName}\n\n${t[lang].impostor}`);
-      // czerwony akcent dla impostora
       document.getElementById("result").style.borderColor = "rgba(255,77,109,.65)";
       return;
     }
@@ -692,7 +825,6 @@ function runCountdownAndReveal(roomData) {
       return;
     }
 
-    // host
     showResult(`${t[lang].category}: ${catName}\n\n${t[lang].roundStarted}`);
   };
 
@@ -728,6 +860,12 @@ function refreshCurrentResult() {
   });
 }
 
+/* ====== (1) SPRZĄTANIE GRACZA PO ROZŁĄCZENIU ====== */
+function setupAutoRemovePlayerOnDisconnect(code) {
+  const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
+  playerRef.onDisconnect().remove();
+}
+
 /* ====== Tworzenie pokoju ====== */
 window.createRoom = async function() {
   playerName = document.getElementById("playerName").value.trim();
@@ -753,6 +891,8 @@ window.createRoom = async function() {
 
   const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
   await playerRef.set({ name: playerName });
+
+  setupAutoRemovePlayerOnDisconnect(code);
 
   roomRef.on("value", async snapshot => {
     await updatePlayerList();
@@ -789,6 +929,8 @@ window.joinRoom = async function() {
   const playerRef = db.ref(`rooms/${code}/players/${playerId}`);
   await playerRef.set({ name: playerName });
 
+  setupAutoRemovePlayerOnDisconnect(code);
+
   showMyName();
 
   document.getElementById("menu").classList.add("hidden");
@@ -818,14 +960,18 @@ window.startGame = async function() {
   const players = Object.keys(data.players || {})
     .filter(id => !(data.players[id].name || "").includes("(HOST)"));
 
-  if (players.length !== MAX_PLAYERS) return alert(t[lang].needExact);
+  if (players.length < MIN_PLAYERS || players.length > MAX_PLAYERS) {
+    return alert(t[lang].needRange);
+  }
 
   const usedWords = data.usedWords || [];
   const chosen = pickUnusedWord(usedWords);
 
-  const impostor = players[Math.floor(Math.random() * players.length)];
+  const impostorCount = pickImpostorCount(players.length);
+  const impostors = pickUniqueImpostors(players, impostorCount);
+
   const roles = {};
-  players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
+  players.forEach(p => roles[p] = (impostors.has(p) ? "impostor" : "normal"));
   roles[playerId] = "host";
 
   const round = (data.round || 0) + 1;
@@ -857,9 +1003,11 @@ window.nextRound = async function() {
   const usedWords = data.usedWords || [];
   const chosen = pickUnusedWord(usedWords);
 
-  const impostor = players[Math.floor(Math.random() * players.length)];
+  const impostorCount = pickImpostorCount(players.length);
+  const impostors = pickUniqueImpostors(players, impostorCount);
+
   const roles = {};
-  players.forEach(p => roles[p] = (p === impostor ? "impostor" : "normal"));
+  players.forEach(p => roles[p] = (impostors.has(p) ? "impostor" : "normal"));
   roles[playerId] = "host";
 
   const round = (data.round || 0) + 1;
@@ -878,7 +1026,7 @@ window.nextRound = async function() {
   document.getElementById("result").classList.add("hidden");
 };
 
-/* ====== Eventy ====== */
+/* ====== Eventy + intro init ====== */
 document.getElementById("btnCreate").addEventListener("click", createRoom);
 document.getElementById("btnJoin").addEventListener("click", joinRoom);
 document.getElementById("btnStart").addEventListener("click", startGame);
@@ -886,6 +1034,13 @@ document.getElementById("btnNextRound").addEventListener("click", nextRound);
 
 document.getElementById("btnLangPl").addEventListener("click", () => { lang = "pl"; applyLang(); });
 document.getElementById("btnLangDe").addEventListener("click", () => { lang = "de"; applyLang(); });
+
+window.addEventListener("DOMContentLoaded", () => {
+  applyIntroLang();
+  const btn = document.getElementById("btnIntroStart");
+  if (btn) btn.addEventListener("click", hideIntro);
+  setTimeout(hideIntro, 1700);
+});
 </script>
 </body>
 </html>
