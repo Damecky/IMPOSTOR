@@ -756,8 +756,8 @@ function pickUnusedWord(usedWords = []) {
 */
 function pickImpostorCount(playerCount) {
   if (playerCount <= 6) return 1;
-  if (playerCount <= 9) return (Math.random() < 0.30) ? 2 : 1;
-  return (Math.random() < 0.60) ? 2 : 1;
+  if (playerCount <= 9) return (Math.random() < 0.15) ? 2 : 1;
+  return (Math.random() < 0.30) ? 2 : 1;
 }
 
 function pickUniqueImpostors(players, count) {
@@ -1079,3 +1079,4 @@ window.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
